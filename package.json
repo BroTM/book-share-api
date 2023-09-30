@@ -72,6 +72,7 @@
     "@types/helmet": "^4.0.0",
     "@types/node": "^20.6.2",
     "@types/pug": "^2.0.6",
+    "@types/validator": "^13.11.2",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2"

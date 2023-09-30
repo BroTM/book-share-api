@@ -1,12 +1,14 @@
-import { Model, Table, Column, DataType, HasMany } from "sequelize-typescript";
+import { Model, Table, Column, DataType, HasMany, IsUUID, Length, IsNumeric } from "sequelize-typescript";
 import { current_timestamp } from "../utils/common";
 import Post from "./posts.model";
+import Utils from "../utils/utils";
 
 @Table({
     tableName: "categories",
     timestamps: false
 })
 class Category extends Model {
+    @IsUUID(4)
     @Column({
         type: DataType.STRING(45),
         primaryKey: true,
@@ -15,6 +17,7 @@ class Category extends Model {
     })
     category_id?: string;
 
+    @Length({min: 2, max: 45, msg: "min:2 and max:45"})
     @Column({
         type: DataType.STRING(45),
         unique: 'name_UNIQUE',
@@ -28,10 +31,14 @@ class Category extends Model {
     })
     declare created_by: string;
 
+    @IsNumeric
     @Column({
         type: DataType.BIGINT,
         allowNull: false,
-        defaultValue: () => current_timestamp()
+        defaultValue: () => current_timestamp(),
+        validate: {
+            isCustomDate: Utils.validateDateFormat
+        }
     })
     declare created_at: number;
 
@@ -40,8 +47,12 @@ class Category extends Model {
     })
     declare updated_by?: string;
 
+    @IsNumeric
     @Column({
-        type: DataType.BIGINT
+        type: DataType.BIGINT,
+        validate: {
+            isCustomDate: Utils.validateDateFormat
+        }
     })
     declare updated_at?: number;
 

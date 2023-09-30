@@ -1,7 +1,8 @@
-import { Model, Table, Column, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { Model, Table, Column, DataType, ForeignKey, BelongsTo, IsUUID, Length, IsIn, AllowNull, IsNumeric } from "sequelize-typescript";
 import { current_timestamp } from "../utils/common";
 import Category from "./categories.model";
 import User from "./users.model";
+import Utils from "../utils/utils";
 
 @Table({
     tableName: 'posts',
@@ -9,6 +10,7 @@ import User from "./users.model";
 })
 class Post extends Model {
 
+    @IsUUID(4)
     @Column({
         type: DataType.STRING(45),
         primaryKey: true,
@@ -16,6 +18,7 @@ class Post extends Model {
     })
     declare post_id?: string;
 
+    @Length({min: 2, max: 100})
     @Column({
         type: DataType.STRING(100),
         allowNull: false
@@ -23,12 +26,14 @@ class Post extends Model {
     })
     declare title: string;
 
+    @Length({min: 4, max: 600})
     @Column({
         type: DataType.STRING(600),
         allowNull: false
     })
     declare content: string;
 
+    @IsIn([['draft', 'published']])
     @Column({
         type: DataType.ENUM('draft', 'published', 'reported'),
         allowNull: false,
@@ -39,13 +44,20 @@ class Post extends Model {
     @Column({
         type: DataType.JSON,
         allowNull: false,
-        defaultValue: {}
+        defaultValue: "[]",
+        validate: {
+            mustBeArray: (val: string) => {
+                if(!Array.isArray(JSON.parse(val)))
+                throw new Error('must be type of json array');
+            }
+        }
     })
     declare reported_user_ids: string; // json array
 
     // association with category
     @ForeignKey(() => Category)
-    @Column
+    @AllowNull(false)
+    @Column({type: DataType.STRING(45)})
     declare category_id: string;
 
     @BelongsTo(() => Category)
@@ -62,10 +74,14 @@ class Post extends Model {
     @BelongsTo(() => User)
     declare created_user: User;
 
+    @IsNumeric
     @Column({
         type: DataType.BIGINT,
         allowNull: false,
-        defaultValue: () => current_timestamp()
+        defaultValue: () => current_timestamp(),
+        validate: {
+            isCustomDate: Utils.validateDateFormat
+        }
     })
     declare created_at: number;
 
@@ -74,8 +90,12 @@ class Post extends Model {
     })
     declare updated_by?: string;
 
+    @IsNumeric
     @Column({
-        type: DataType.BIGINT
+        type: DataType.BIGINT,
+        validate: {
+            isCustomDate: Utils.validateDateFormat
+        }
     })
     declare updated_at?: number;
 
