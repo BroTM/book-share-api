@@ -1,57 +1,95 @@
-import { DataTypes, Sequelize, Model, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute, Association } from "sequelize";
-import Project from "./projects.model";
+import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute, Association, ForeignKey } from "sequelize";
+import Post from "./posts.model";
 import sequelize from "../database/mysql";
 
-class User extends Model<InferAttributes<User, { omit: 'projects' }>, InferCreationAttributes<User>> {
-  declare user_id: CreationOptional<Number>;
+class User extends Model<InferAttributes<User, { omit: 'posts' }>, InferCreationAttributes<User>> {
+  declare user_id: CreationOptional<string>;
 
-  declare first_name: string;
-  declare last_name: string | null;
+  declare user_name: string;
 
-  declare createdAt: CreationOptional<Date>;
-  declare updatedAt: CreationOptional<Date>;
+  declare email: string;
+  declare password: string;
+  declare bio: CreationOptional<String>;
+  declare token: string;
+  declare user_type: 'normal' | 'premium';
+  declare status: 'no_verify' | 'verified' | 'suspended';
 
-  declare projects?: NonAttribute<Project[]>;
+  declare created_at: CreationOptional<Number>;
+  declare updated_at: CreationOptional<Number>;
 
-  get fullName(): NonAttribute<string> {
-    return [this.first_name, this.last_name].join(' ');
-  }
+  declare updated_by: ForeignKey<User['user_id']>;
+  declare updated_user?: NonAttribute<User>
+
+  declare posts?: NonAttribute<Post[]>;
 
   declare static associations: {
-    projects: Association<User, Project>;
+    posts: Association<User, Post>;
   };
 }
 
-User.init(
+sequelize.define('User',
   {
     user_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      autoIncrement: true,
-      primaryKey: true
+      type: DataTypes.STRING(45),
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4
     },
-    first_name: {
-      type: new DataTypes.STRING(25),
+    user_name: {
+      type: DataTypes.STRING(45),
       allowNull: false
     },
-    last_name: {
-      type: new DataTypes.STRING(25),
-      defaultValue: null,
+    email: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: "email_UNIQUE"
+    },
+    password: {
+      type: DataTypes.STRING(300),
+      allowNull: false
+    },
+    bio: {
+      type: DataTypes.STRING(400),
       allowNull: true
     },
-    createdAt: DataTypes.DATE,
-    updatedAt: DataTypes.DATE,
+    token: {
+      type: DataTypes.STRING(400),
+      allowNull: false
+    },
+    user_type: {
+      type: DataTypes.ENUM('normal', 'premium'),
+      allowNull: false,
+      defaultValue: 'normal'
+    },
+    status: {
+      type: DataTypes.ENUM('no_verify', 'verified', 'suspended'),
+      allowNull: false,
+      defaultValue: 'no_verify'
+    },
+    created_at: {
+        type: DataTypes.BIGINT,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+    },
+    updated_by: {
+        type: DataTypes.STRING(45),
+        allowNull: true
+    },
+    updated_at: {
+        type: DataTypes.BIGINT,
+        allowNull: true
+    }
   },
   {
     tableName: 'users',
-    sequelize // passing the `sequelize` instance is required
+    timestamps: false
   }
 );
 
 // Here we associate which actually populates out pre-declared `association` static and other methods.
-User.hasMany(Project, {
-  sourceKey: 'user_id',
-  foreignKey: 'ownerId',
-  as: 'projects' // this determines the name in `associations`!
-});
+// User.hasMany(Post, {
+//   sourceKey: 'user_id',
+//   foreignKey: 'created_by',
+//   as: 'posts' // this determines the name in `associations`!
+// });
 
 export default User;
