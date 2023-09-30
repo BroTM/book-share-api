@@ -9,7 +9,27 @@
     "start:dev": "nodemon",
     "debug": "set debug=* && npm run start",
     "build": "tsc",
-    "serve": "node dist/app.js"
+    "serve": "node dist/app.js",
+    "test:no-reloading": "./node_modules/.bin/ts-node -r tsconfig-paths/register ./spec"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts, html",
+    "ignore": [
+      "./public"
+    ],
+    "exec": "ts-node -r tsconfig-paths/register ./app.ts"
+  },
+  "_moduleAliases": {
+    "@daos": "dist/daos",
+    "@dtos": "dist/src/dtos",
+    "@entities": "dist/src/entities",
+    "@shared": "dist/src/shared",
+    "@server": "dist/src/server",
+    "@config": "dist/config",
+    "@models": "dist/src/models"
   },
   "keywords": [
     "pug",
@@ -34,6 +54,7 @@
     "express": "^4.17.1",
     "helmet": "^7.0.0",
     "http-errors": "^2.0.0",
+    "module-alias": "^2.2.3",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
     "morgan": "^1.10.0",
@@ -52,6 +73,7 @@
     "@types/node": "^20.6.2",
     "@types/pug": "^2.0.6",
     "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2"
   }
 }

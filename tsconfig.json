@@ -34,6 +34,9 @@
       "@dtos/*": [
         "src/dtos/*"
       ],
+      "@models/*": [
+        "src/models/*"
+      ],
       "@config": [
         "./config/*"
       ],

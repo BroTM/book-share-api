@@ -24,12 +24,9 @@ class Database {
             models: [path.join(__dirname, '/../models/*.model.ts')]
         }
         );
-console.log(this.sequelize);
         await this.sequelize
             .authenticate()
             .then(() => {
-                
-console.log(__dirname+ ".." + '/**/*.models.ts');
                 console.log("Connection has been established successfully.");
             })
             .catch((err) => {
