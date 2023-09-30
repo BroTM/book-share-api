@@ -1,66 +1,52 @@
-import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute, Association } from "sequelize";
+import { Model, Table, Column, DataType, HasMany } from "sequelize-typescript";
+import { current_timestamp } from "../utils/common";
 import Post from "./posts.model";
-import sequelize from "../database/mysql";
 
-class Category extends Model<InferAttributes<Category, { omit: 'posts' }>, InferCreationAttributes<Category>> {
-    declare category_id: CreationOptional<String>;
+@Table({
+    tableName: "categories",
+    timestamps: false
+})
+class Category extends Model {
+    @Column({
+        type: DataType.STRING(45),
+        primaryKey: true,
+        defaultValue: DataType.UUIDV4,
+        allowNull: false,
+    })
+    category_id?: string;
 
+    @Column({
+        type: DataType.STRING(45),
+        unique: 'name_UNIQUE',
+        allowNull: false
+    })
     declare name: string;
 
-    declare created_at: CreationOptional<Number>;
-    declare created_by: String;
-    declare updated_at: CreationOptional<Number>;
-    declare updated_by: CreationOptional<String>;
+    @Column({
+        type: DataType.STRING(45),
+        allowNull: false
+    })
+    declare created_by: string;
 
-    declare posts?: NonAttribute<Post[]>;
+    @Column({
+        type: DataType.BIGINT,
+        allowNull: false,
+        defaultValue: () => current_timestamp()
+    })
+    declare created_at: number;
 
-    declare static associations: {
-        posts: Association<Category, Post>;
-    };
+    @Column({
+        type: DataType.STRING(45)
+    })
+    declare updated_by?: string;
+
+    @Column({
+        type: DataType.BIGINT
+    })
+    declare updated_at?: number;
+
+    @HasMany(()=>Post)
+    declare posts?: Post[]
 }
-
-sequelize.define('Category',
-    {
-        category_id: {
-            type: DataTypes.STRING(45),
-            primaryKey: true,
-            defaultValue: DataTypes.UUIDV4,
-            allowNull: false
-        },
-        name: {
-            type: DataTypes.STRING(45),
-            unique: 'name_UNIQUE',
-            allowNull: false
-        },
-        created_by: {
-            type: DataTypes.STRING(45),
-            allowNull: false
-        },
-        created_at: {
-            type: DataTypes.BIGINT,
-            allowNull: false,
-            defaultValue: DataTypes.NOW
-        },
-        updated_by: {
-            type: DataTypes.STRING(45),
-            allowNull: true
-        },
-        updated_at: {
-            type: DataTypes.BIGINT,
-            allowNull: true
-        }
-    },
-    {
-        tableName: 'categories',
-        timestamps: false
-    }
-);
-
-// Here we associate which actually populates out pre-declared `association` static and other methods.
-Category.hasMany(Post, {
-    sourceKey: 'category_id',
-    foreignKey: 'category_id',
-    as: 'posts' // this determines the name in `associations`!
-});
 
 export default Category;

@@ -1,95 +1,83 @@
-import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute, Association, ForeignKey } from "sequelize";
+import { Model, Table, Column, DataType, HasMany } from "sequelize-typescript";
+import { current_timestamp } from "../utils/common";
 import Post from "./posts.model";
-import sequelize from "../database/mysql";
 
-class User extends Model<InferAttributes<User, { omit: 'posts' }>, InferCreationAttributes<User>> {
-  declare user_id: CreationOptional<string>;
+@Table({
+  tableName: "users",
+  timestamps: false
+})
+class User extends Model {
 
+  @Column({
+    type: DataType.STRING(45),
+    primaryKey: true,
+    defaultValue: DataType.UUIDV4
+  })
+  declare user_id: string;
+
+  @Column({
+    type: DataType.STRING(45),
+    allowNull: false
+  })
   declare user_name: string;
 
+  @Column({
+    type: DataType.STRING(100),
+    allowNull: false,
+    unique: "email_UNIQUE"
+  })
   declare email: string;
+
+  @Column({
+    type: DataType.STRING(300),
+    allowNull: false
+  })
   declare password: string;
-  declare bio: CreationOptional<String>;
+
+  @Column({
+    type: DataType.STRING(400)
+  })
+  declare bio?: string;
+
+  @Column({
+    type: DataType.STRING(400),
+    allowNull: false
+  })
   declare token: string;
+
+  @Column({
+    type: DataType.ENUM('normal', 'premium'),
+    allowNull: false,
+    defaultValue: 'normal'
+  })
   declare user_type: 'normal' | 'premium';
+
+  @Column({
+    type: DataType.ENUM('no_verify', 'verified', 'suspended'),
+    allowNull: false,
+    defaultValue: 'no_verify'
+  })
   declare status: 'no_verify' | 'verified' | 'suspended';
 
-  declare created_at: CreationOptional<Number>;
-  declare updated_at: CreationOptional<Number>;
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: false,
+    defaultValue: () => current_timestamp()
+  })
+  declare created_at: number;
 
-  declare updated_by: ForeignKey<User['user_id']>;
-  declare updated_user?: NonAttribute<User>
+  @Column({
+    type: DataType.STRING(45)
+  })
+  declare updated_by?: string;
 
-  declare posts?: NonAttribute<Post[]>;
+  @Column({
+    type: DataType.BIGINT
+  })
+  declare updated_at?: number;
 
-  declare static associations: {
-    posts: Association<User, Post>;
-  };
+  @HasMany(()=>Post)
+  declare posts?: Post[]
 }
-
-sequelize.define('User',
-  {
-    user_id: {
-      type: DataTypes.STRING(45),
-      primaryKey: true,
-      defaultValue: DataTypes.UUIDV4
-    },
-    user_name: {
-      type: DataTypes.STRING(45),
-      allowNull: false
-    },
-    email: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      unique: "email_UNIQUE"
-    },
-    password: {
-      type: DataTypes.STRING(300),
-      allowNull: false
-    },
-    bio: {
-      type: DataTypes.STRING(400),
-      allowNull: true
-    },
-    token: {
-      type: DataTypes.STRING(400),
-      allowNull: false
-    },
-    user_type: {
-      type: DataTypes.ENUM('normal', 'premium'),
-      allowNull: false,
-      defaultValue: 'normal'
-    },
-    status: {
-      type: DataTypes.ENUM('no_verify', 'verified', 'suspended'),
-      allowNull: false,
-      defaultValue: 'no_verify'
-    },
-    created_at: {
-        type: DataTypes.BIGINT,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
-    },
-    updated_by: {
-        type: DataTypes.STRING(45),
-        allowNull: true
-    },
-    updated_at: {
-        type: DataTypes.BIGINT,
-        allowNull: true
-    }
-  },
-  {
-    tableName: 'users',
-    timestamps: false
-  }
-);
-
-// Here we associate which actually populates out pre-declared `association` static and other methods.
-// User.hasMany(Post, {
-//   sourceKey: 'user_id',
-//   foreignKey: 'created_by',
-//   as: 'posts' // this determines the name in `associations`!
-// });
 
 export default User;

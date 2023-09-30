@@ -1,75 +1,83 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute, ForeignKey, DataTypes } from "sequelize";
+import { Model, Table, Column, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { current_timestamp } from "../utils/common";
 import Category from "./categories.model";
 import User from "./users.model";
-import sequelize from "../database/mysql";
 
-class Post extends Model<InferAttributes<Post, { omit: "category" }>, InferCreationAttributes<Post>> {
+@Table({
+    tableName: 'posts',
+    timestamps: false
+})
+class Post extends Model {
 
-    declare post_id: CreationOptional<String>;
+    @Column({
+        type: DataType.STRING(45),
+        primaryKey: true,
+        defaultValue: DataType.UUIDV4
+    })
+    declare post_id?: string;
+
+    @Column({
+        type: DataType.STRING(100),
+        allowNull: false
+
+    })
     declare title: string;
+
+    @Column({
+        type: DataType.STRING(600),
+        allowNull: false
+    })
     declare content: string;
+
+    @Column({
+        type: DataType.ENUM('draft', 'published', 'reported'),
+        allowNull: false,
+        defaultValue: 'draft'
+    })
     declare status: 'draft' | 'published' | 'reported';
+
+    @Column({
+        type: DataType.JSON,
+        allowNull: false,
+        defaultValue: {}
+    })
     declare reported_user_ids: string; // json array
 
-    declare category_id: ForeignKey<Category['category_id']>;
-    declare category?: NonAttribute<Category>;
+    // association with category
+    @ForeignKey(() => Category)
+    @Column
+    declare category_id: string;
 
-    declare created_at: CreationOptional<Number>;
-    declare created_by: ForeignKey<User['user_id']>;
-    declare created_user?: NonAttribute<User>;
+    @BelongsTo(() => Category)
+    declare category: Category;
 
-    declare updated_at: CreationOptional<Number>;
-    declare updated_by: ForeignKey<User['user_id']>;
-    declare updated_user?: NonAttribute<User>
+    // association with User
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.STRING(45),
+        allowNull: false
+    })
+    declare created_by: string;
+
+    @BelongsTo(() => User)
+    declare created_user: User;
+
+    @Column({
+        type: DataType.BIGINT,
+        allowNull: false,
+        defaultValue: () => current_timestamp()
+    })
+    declare created_at: number;
+
+    @Column({
+        type: DataType.STRING(45)
+    })
+    declare updated_by?: string;
+
+    @Column({
+        type: DataType.BIGINT
+    })
+    declare updated_at?: number;
 
 }
-
-sequelize.define('Post',
-    {
-        post_id: {
-            type: DataTypes.STRING(45),
-            primaryKey: true,
-            defaultValue: DataTypes.UUIDV4
-        },
-        title: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        },
-        content: {
-            type: DataTypes.STRING(600),
-            allowNull: false
-        },
-        status: {
-            type: DataTypes.ENUM('draft', 'published', 'reported'),
-            allowNull: false,
-            defaultValue: 'draft'
-        },
-        reported_user_ids: {
-            type: DataTypes.JSON,
-            allowNull: false,
-            defaultValue: {}
-        },
-        created_by: {
-            type: DataTypes.STRING(45),
-            allowNull: false
-        },
-        created_at: {
-            type: DataTypes.BIGINT,
-            allowNull: false,
-            defaultValue: DataTypes.NOW
-        },
-        updated_by: {
-            type: DataTypes.STRING(45),
-            allowNull: true
-        },
-        updated_at: {
-            type: DataTypes.BIGINT,
-            allowNull: true
-        }
-    },
-    {
-        tableName: "posts",
-        timestamps: false
-    });
-
 export default Post;
