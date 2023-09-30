@@ -1,25 +1,41 @@
-import {Sequelize} from "sequelize";
+import { Sequelize } from "sequelize-typescript";
 import config from "../../config/db.config";
-const sequelize = new Sequelize(
-    config.database!,
-    config.username!,
-    config.password,
-    {
-        host: config.db_host,
-        dialect: "mysql",
-        timezone: config.timezone,
-        pool: {
-            max: 20,
-            idle: 10000 //Remove a connection from the pool after the connection has been idle (not been used) for 10 seconds
-        },
-        dialectOptions: {
-            useUTC: false, // for reading from database
-        }
+import path from 'path'
+
+class Database {
+    public sequelize: Sequelize | undefined;
+
+    constructor() {
+        this.connectToDatabase();
     }
-);
 
-(async () => {
-    await sequelize.sync({ alter: true });
-})();
+    private async connectToDatabase() {
+        this.sequelize = new Sequelize({
+            database: config.database!,
+            username: config.username!,
+            password: config.password,
+            dialect: "mysql",
+            host: config.db_host,
+            timezone: config.timezone,
+            pool: {
+                max: 20,
+                idle: 10000 //Remove a connection from the pool after the connection has been idle (not been used) for 10 seconds
+            },
+            models: [path.join(__dirname, '/../models/*.model.ts')]
+        }
+        );
+console.log(this.sequelize);
+        await this.sequelize
+            .authenticate()
+            .then(() => {
+                
+console.log(__dirname+ ".." + '/**/*.models.ts');
+                console.log("Connection has been established successfully.");
+            })
+            .catch((err) => {
+                console.error("Unable to connect to the Database:", err);
+            });
+    }
+}
 
-export default sequelize;
+export default Database;

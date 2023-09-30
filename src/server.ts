@@ -6,6 +6,7 @@ import logger from 'morgan';
 import helmet from 'helmet';
 import 'dotenv/config';
 
+import Database from './database/mysql';
 import baseRouter from './routes/index';
 
 var app = express();
@@ -40,5 +41,8 @@ app.use(function(err: any, req: Request, res: Response, next: NextFunction) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+const db = new Database();
+db.sequelize?.sync();
 
 export default app;
