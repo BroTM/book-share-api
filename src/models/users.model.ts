@@ -92,7 +92,7 @@ class User extends Model {
   })
   declare updated_at?: number;
 
-  @HasMany(()=>Post)
+  @HasMany(()=>Post, "created_by")
   declare posts?: Post[]
 }
 

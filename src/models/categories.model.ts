@@ -56,7 +56,7 @@ class Category extends Model {
     })
     declare updated_at?: number;
 
-    @HasMany(()=>Post)
+    @HasMany(()=>Post, 'category_id')
     declare posts?: Post[]
 }
 

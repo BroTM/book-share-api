@@ -60,7 +60,7 @@ class Post extends Model {
     @Column({type: DataType.STRING(45)})
     declare category_id: string;
 
-    @BelongsTo(() => Category)
+    @BelongsTo(() => Category, "category_id")
     declare category: Category;
 
     // association with User
@@ -71,7 +71,7 @@ class Post extends Model {
     })
     declare created_by: string;
 
-    @BelongsTo(() => User)
+    @BelongsTo(() => User, 'created_by')
     declare created_user: User;
 
     @IsNumeric
