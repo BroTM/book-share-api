@@ -1,6 +1,8 @@
 
 // import * as UserController from "../controllers/api/users.controller";
-import verifyToken from "../middlewares/auth.middleware";
+import verifyToken from "../middlewares/verify-token.middleware";
+import authorize from "../middlewares/authorize.middleware";
+import Role from "../_helper/role";
 import * as AdminController from "../controllers/api/admins.controller";
 
 import { Router } from "express";
@@ -10,7 +12,7 @@ const apiRouter = Router();
 
 /** admins */
 apiRouter.post("/admins/login", AdminController.login);
-apiRouter.post("/admins/register", verifyToken, AdminController.register);
-apiRouter.post("/admins/logout", AdminController.logout);
+apiRouter.post("/admins/register", verifyToken, authorize(Role.Admin), AdminController.register);
+apiRouter.post("/admins/logout", verifyToken, authorize(Role.Admin), AdminController.logout);
 
 export default apiRouter;
