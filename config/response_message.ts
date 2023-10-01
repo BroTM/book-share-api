@@ -15,5 +15,13 @@ export default{
     },
     other: {
         'something_wrong': "Something Went Wrong!"
+    },
+    login: {
+        'incorrect_userid': 'Incorrect username or ID!',
+        'incorrect_password': 'Incorrect password!',
+        'already_logout': 'Already logout!',
+        'please_login': 'Please login first',
+        'logout_success': 'Logout successfully.',
+        'no_user': `User doesn't exist`
     }
 }

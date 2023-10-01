@@ -38,7 +38,7 @@
         "src/models/*"
       ],
       "@config": [
-        "./config/*"
+        "config/*"
       ],
       "@daos/*": [
         "src/daos/*"
