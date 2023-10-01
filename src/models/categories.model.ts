@@ -1,7 +1,8 @@
-import { Model, Table, Column, DataType, HasMany, IsUUID, Length, IsNumeric } from "sequelize-typescript";
+import { Model, Table, Column, DataType, HasMany, IsUUID, Length, IsNumeric, BelongsTo, ForeignKey } from "sequelize-typescript";
 import { current_timestamp } from "../utils/common";
 import Post from "./posts.model";
 import Utils from "../utils/utils";
+import Admin from "./admins.model";
 
 @Table({
     tableName: "categories",
@@ -25,11 +26,15 @@ class Category extends Model {
     })
     declare name: string;
 
+    @ForeignKey(() => Admin)
     @Column({
         type: DataType.STRING(45),
         allowNull: false
     })
     declare created_by: string;
+
+    @BelongsTo(() => Admin, 'created_by')
+    declare created_user: Admin;
 
     @IsNumeric
     @Column({
@@ -42,10 +47,14 @@ class Category extends Model {
     })
     declare created_at: number;
 
+    @ForeignKey(() => Admin)
     @Column({
         type: DataType.STRING(45)
     })
     declare updated_by?: string;
+
+    @BelongsTo(() => Admin, 'updated_by')
+    declare updated_user: Admin;
 
     @IsNumeric
     @Column({

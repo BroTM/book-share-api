@@ -277,7 +277,7 @@ export async function publish(req: Request | any, res: Response, next: NextFunct
         });
 }
 
-/*** @PUT @route /user/me/post/{post_id} */
+/*** @route /user/me/post/{post_id} */
 export async function destroy(req: Request | any, res: Response, next: NextFunction) {
 
     const post_id = req.params.post_id;

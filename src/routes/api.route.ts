@@ -5,6 +5,7 @@ import Role from "../_helper/role";
 import * as AdminController from "../controllers/api/admins.controller";
 import * as UserController from "../controllers/api/users.controller";
 import * as PostController from "../controllers/api/posts.controller";
+import * as CategoryController from "../controllers/api/categories.controller";
 
 import { Router } from "express";
 const apiRouter = Router();
@@ -42,5 +43,14 @@ apiRouter.post("/users/posts/:post_id/report", verifyToken, authorize(Role.User)
 apiRouter.get("/admins/users/:user_id/posts", verifyToken, authorize(Role.Admin), PostController.allPostsByUserIdForAdmin);
 apiRouter.get("/admins/users/:user_id/posts/:post_id", verifyToken, authorize(Role.Admin), PostController.detailByUserIdForAdmin);
 apiRouter.put("/admins/posts/:post_id/status", verifyToken, authorize(Role.Admin), PostController.reportStatus);
+
+/** categories */
+apiRouter.get("/users/categories", verifyToken, authorize(Role.User), CategoryController.allCategoriesForUsers);
+
+apiRouter.get("/admins/categories", verifyToken, authorize(Role.Admin), CategoryController.allCategoriesForAdmin);
+apiRouter.post("/admins/categories", verifyToken, authorize(Role.Admin), CategoryController.create);
+apiRouter.get("/admins/categories/:category_id", verifyToken, authorize(Role.Admin), CategoryController.getOne);
+apiRouter.put("/admins/categories/:category_id", verifyToken, authorize(Role.Admin), CategoryController.update);
+apiRouter.delete("/admins/categories/:category_id", verifyToken, authorize(Role.Admin), CategoryController.destroy);
 
 export default apiRouter;

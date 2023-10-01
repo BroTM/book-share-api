@@ -32,5 +32,8 @@ export default{
         'already_reported': 'Post is already reported!',
         'reported_post': 'It is reported post!',
         'delete_success': 'Post have been deleted successfully!'
+    },
+    category: {
+        'delete_success': 'Category have been deleted successfully!'
     }
 }
