@@ -41,5 +41,6 @@ apiRouter.post("/users/posts/:post_id/report", verifyToken, authorize(Role.User)
 /** posts by admins */
 apiRouter.get("/admins/users/:user_id/posts", verifyToken, authorize(Role.Admin), PostController.allPostsByUserIdForAdmin);
 apiRouter.get("/admins/users/:user_id/posts/:post_id", verifyToken, authorize(Role.Admin), PostController.detailByUserIdForAdmin);
+apiRouter.put("/admins/posts/:post_id/status", verifyToken, authorize(Role.Admin), PostController.reportStatus);
 
 export default apiRouter;

@@ -372,6 +372,64 @@ class PostRepository implements IPostRepository {
         }
     }
 
+
+    /** 
+     * publish to reported
+     * auth user must be owner
+     * @PUT @route /user/me/post/{post_id} */
+    public async reportStatus(post_id: string, admin_id: string): Promise<Post> {
+        try {
+            let post = await Post.findOne(
+                {
+                    include: [
+                        {
+                            model: Category,
+                            attributes: []
+                        },
+                        {
+                            model: User,
+                            attributes: [],
+                            as: "created_user"
+                        },
+                        {
+                            model: User,
+                            attributes: [],
+                            as: "updated_user"
+                        }
+                    ],
+                    attributes: [
+                        'post_id', 'title', 'content', 'created_at', 'status', 'updated_at',
+                        [Sequelize.literal('category.name'), 'category_name'],
+                        [Sequelize.literal('created_user.user_name'), 'created_name'],
+                        [Sequelize.literal('updated_user.user_name'), 'updated_name']
+
+                    ],
+                    where: {
+                        post_id: post_id,
+                        status: ['reported', 'published']
+                    }
+                }
+            );
+
+            if (!post) return Promise.reject("NO_TRANSACTION");
+
+            // user fault
+            if (post.status == "reported")
+                return Promise.reject('ALREADY_REPORTED');
+
+            post.status = 'reported';
+            post.updated_at = current_timestamp();
+            post.updated_by = admin_id;
+
+            let affectedRows = await post.save();
+
+            let { updated_at, updated_by, ...withoutUpdateInfo } = post.dataValues;
+
+            return withoutUpdateInfo;
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
+    }
 }
 
 export default new PostRepository();

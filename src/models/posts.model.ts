@@ -33,7 +33,7 @@ class Post extends Model {
     })
     declare content: string;
 
-    @IsIn([['draft', 'published']])
+    @IsIn([['draft', 'published', 'reported']])
     @Column({
         type: DataType.ENUM('draft', 'published', 'reported'),
         allowNull: false,

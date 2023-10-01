@@ -36,4 +36,7 @@ export interface IPostRepository {
 
     /** @put @route /user/post/{post_id} */
     report: (post_id: string, user_id: string) => Promise<Post>;
+
+    /** @put @route /admin/post/{post_id}/status */
+    reportStatus: (post_id: string, admin_id: string) => Promise<Post>;
 }
