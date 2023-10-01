@@ -12,4 +12,5 @@ export class DataStoredInToken {
     declare id: string;
     declare auth_type: "USER" | "ADMIN";
     declare token_status: "REGISTER" | "LOGIN" | "LOGOUT";
+    declare name: string;
 }

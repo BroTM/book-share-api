@@ -1,6 +1,6 @@
-import User from "../../models/users.model";
-import { createUserDto, deleteUserDto, updateUserDto } from "../../dtos/users.dto";
-import { filterDto, paginateDto } from "../../dtos/common.dto";
+import User from "@models/users.model";
+import { createUserDto, deleteUserDto, updateUserDto } from "@dtos/users.dto";
+import { filterDto, paginateDto } from "@dtos/common.dto";
 
 import {IUserRepository} from "./users.interface";
 
@@ -15,7 +15,7 @@ class UserRepository implements IUserRepository {
         return user;
     }
     
-    public async findAll({limit=10, start}: paginateDto, filter_args?: filterDto ): Promise<User[] | []> {
+    public async findAll({limit=10, page}: paginateDto, filter_args?: filterDto ): Promise<User[] | []> {
         return [];
     }
 

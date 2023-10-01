@@ -21,11 +21,12 @@ class AdminRepository implements IAdminRepository {
       if (!match)
         return Promise.reject("INCORRECT_PASSWORD");
 
-        const token = await this.generateToken(_data.login_id, 'ADMIN', 'LOGIN');
+        const token = await this.generateToken(_data.login_id, 'ADMIN', 'LOGIN', admin.name);
         const affectedRows = await Admin.update({token: token}, {where: {login_id: admin.login_id}})
 
         const { password, ...withoutPassword } = admin.dataValues;
-        
+        withoutPassword.token = token;
+
         return withoutPassword;
       
     } catch (err: any) {
@@ -41,7 +42,7 @@ class AdminRepository implements IAdminRepository {
       if (!admin) return Promise.reject("NO_TRANSACTION");
 
 
-        const token = await this.generateToken(id, 'ADMIN', 'LOGOUT');
+        const token = await this.generateToken(id, 'ADMIN', 'LOGOUT', admin.name);
         const affectedRows = await Admin.update({token: token}, {where: {login_id: admin.login_id}});
 
         return;
@@ -50,7 +51,7 @@ class AdminRepository implements IAdminRepository {
     }
   }
 
-  public async register(_data: Admin): Promise<Admin> {
+  public async register(_data: Admin): Promise<Admin | any> {
 
     //hash the password
     const salt = bcrypt.genSaltSync(10);
@@ -59,27 +60,30 @@ class AdminRepository implements IAdminRepository {
 
       const hash_password = await bcrypt.hashSync(_data.password!, salt);
 
-      const token = await this.generateToken(_data.login_id!, 'ADMIN', 'REGISTER');
+      const _token = await this.generateToken(_data.login_id!, 'ADMIN', 'REGISTER', _data.name);
 
-      return await Admin.create({
+      let admin = await Admin.create({
         login_id: _data.login_id,
         name: _data.name,
         password: hash_password,
-        token: token
+        token: _token
       })
+      const {password, token, ...withoutCredential} = admin.dataValues;
 
+      return withoutCredential;
     } catch (err: any) {
 
       return Promise.reject(err);
     }
   }
-  private async generateToken (login_id: string, auth_type: "USER" | "ADMIN", token_status: "REGISTER" | "LOGIN" | "LOGOUT") {
+  private async generateToken (_login_id: string, _auth_type: "USER" | "ADMIN", _token_status: "REGISTER" | "LOGIN" | "LOGOUT", _name: string) {
     const dataStoredInToken: DataStoredInToken = {
-      id: login_id,
-      auth_type: auth_type,
-      token_status: token_status
+      id: _login_id,
+      name: _name,
+      auth_type: _auth_type,
+      token_status: _token_status
     };
-    const secretKey: string = authConfig.admin_secret!;
+    const secretKey: string = authConfig.secret_key!;
     const expiresIn: number = 60 * 60 * 24;
   
     return await sign(dataStoredInToken, secretKey, { expiresIn });
