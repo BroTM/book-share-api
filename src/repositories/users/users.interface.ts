@@ -1,11 +1,15 @@
 import { filterDto, paginateDto } from "@dtos/common.dto";
 import User from "@models/users.model";
-import { createUserDto, updateUserDto, deleteUserDto } from "@dtos/users.dto";
+import { loginUserDto, changePasswordDto, resetPasswordDto, signUpConfirmDto, bioUpdateDto } from "@dtos/users.dto";
 
 export interface IUserRepository {
-    getOne: (id: number) => Promise<User | null>;
-    findAll: ({limit=10, page}: paginateDto, filter_args?: filterDto ) => Promise<User[] | []>;
-    add: (data: createUserDto) => Promise<User>;
-    update: (id: number, data: updateUserDto) => Promise<User>;
-    delete: (id: number, data: deleteUserDto) => Promise<User>;
+    login: (data: loginUserDto) => Promise<User>;
+    bioUpdate: (data: bioUpdateDto) => Promise<User>;
+    signup: (data: User) => Promise<void>;
+    signupConfirm: (data: signUpConfirmDto) => Promise<User>;
+    changePassword: (data: changePasswordDto) => Promise<void>;
+    forgetPassword: (email: string) => Promise<void>;
+    resetPassword: (data: resetPasswordDto) => Promise<void>;
+    logout: (id: string) => Promise<void>;
+    me: (id: string) => Promise<User>;
 }

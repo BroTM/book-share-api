@@ -1,14 +1,25 @@
-export class createUserDto {
-    declare first_name: string;
-    declare last_name: string | null;
+export class loginUserDto {
+    declare email: string;
+    declare password: string;
 }
 
-export class updateUserDto {
-    declare first_name: string;
-    declare last_name: string | null;
-    declare updated_by: number;
+export class changePasswordDto {
+    declare current_password: string;
+    declare new_password: string;
+    declare confirm_password: string;
 }
 
-export class deleteUserDto {
-    declare deleted_by: number;
+export class signUpConfirmDto {
+    declare token: string;
+    declare email: string;
+}
+
+export class resetPasswordDto {
+    declare new_password: string;
+    declare confirm_password: string;
+}
+
+export class bioUpdateDto {
+    declare user_name: string;
+    declare bio: string;
 }

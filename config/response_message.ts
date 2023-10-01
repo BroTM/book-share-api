@@ -22,6 +22,7 @@ export default{
         'already_logout': 'Already logout!',
         'please_login': 'Please login first',
         'logout_success': 'Logout successfully.',
-        'no_user': `User doesn't exist`
+        'no_user': `User doesn't exist`,
+        'signup_fail': "Signup fail!"
     }
 }

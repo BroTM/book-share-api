@@ -4,11 +4,15 @@ import verifyToken from "../middlewares/verify-token.middleware";
 import authorize from "../middlewares/authorize.middleware";
 import Role from "../_helper/role";
 import * as AdminController from "../controllers/api/admins.controller";
+import * as UserController from "../controllers/api/users.controller";
 
 import { Router } from "express";
 const apiRouter = Router();
 
-// apiRouter.get("/users/:id", UserController.getOne);
+apiRouter.post("/users/signup", UserController.signup);
+apiRouter.post("/users/signup-confirm", UserController.signupConfirm);
+apiRouter.post("/users/login", UserController.login);
+apiRouter.post("/users/logout", verifyToken, authorize(Role.User), UserController.logout);
 
 /** admins */
 apiRouter.post("/admins/login", AdminController.login);

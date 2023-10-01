@@ -2,28 +2,117 @@ import { NextFunction, Request, Response } from "express";
 import userRepository from "../../repositories/users/users.repository";
 import Utils from "../../utils/utils";
 import message from "../../../config/response_message";
+import User from "@models/users.model";
 
-export function getOne (req: Request, res: Response, next: NextFunction) {
+export function login(req: Request, res: Response, next: NextFunction) {
 
-  let user_id = req.params?.id;
+  const {email, password} = req.body;
 
-  if(!Utils.isNumber(user_id)) {
-    return res.status(405).send({message: message.req_err.err_405})
-  }
-
-  userRepository.getOne(parseInt(user_id))
-    .then((data: any )=> {
+  userRepository.login({email, password})
+    .then((data: any) => {
       res.json({
-        'status': "success",
-        'data': data.data
+        user: data
       });
     })
     .catch((err: any) => {
-      console.log(`Error ${err}`)
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.login.incorrect_userid;
+      else if (err == "INCORRECT_PASSWORD")
+        msg = message.login.incorrect_password;
+
       res.json({
         status: "fail",
         data: err,
-        message: err == 'NO_TRANSACTION'? message.general.no_transaction : message.other.something_wrong
+        message: msg
       })
     });
+}
+
+
+export function logout(req: Request | any, res: Response, next: NextFunction) {
+
+  const { id, token_status } = req.decoded;
+
+  // prevent calling from register state
+  if (token_status == 'REGISTER')
+    return res.send({ message: message.login.please_login });
+
+  // prevent user token
+  if (!Utils.isUUid(id)) {
+    return res.status(405).send({ message: message.req_err.err_405 })
   }
+
+  userRepository.logout(id)
+    .then((data: any) => {
+      res.json({
+        'message': message.login.logout_success
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.login.no_user;
+
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}
+
+export async function signup(req: Request | any, res: Response, next: NextFunction) {
+
+  req.body.token = "pass the validation";
+
+  let user = await User.build(req.body);
+
+  await user.validate()
+    .then((result: any) => {
+
+      return userRepository.signup(user);
+    })
+    .then((data: any) => {
+      res.json({
+        message: `Verfification has been sent to ${user.email}`
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+      res.json({
+        status: "fail",
+        data: process.env.NODE_ENV == "development" ? err : {},
+        message: message.login.signup_fail
+      })
+    });
+}
+
+
+export async function signupConfirm(req: Request | any, res: Response, next: NextFunction) {
+
+  const { email, token } = req.body;
+  userRepository.signupConfirm({ email, token })
+    .then((data: any) => {
+      res.json({
+        'user': data,
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+      
+      let msg = message.login.signup_fail;
+      if (err == "NO_TRANSACTION")
+        msg = message.login.no_user;
+
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}

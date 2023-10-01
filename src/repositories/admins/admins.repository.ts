@@ -76,7 +76,7 @@ class AdminRepository implements IAdminRepository {
       return Promise.reject(err);
     }
   }
-  private async generateToken (_login_id: string, _auth_type: "USER" | "ADMIN", _token_status: "REGISTER" | "LOGIN" | "LOGOUT", _name: string) {
+  public async generateToken (_login_id: string, _auth_type: "USER" | "ADMIN", _token_status: "REGISTER" | "LOGIN" | "LOGOUT", _name: string) {
     const dataStoredInToken: DataStoredInToken = {
       id: _login_id,
       name: _name,
