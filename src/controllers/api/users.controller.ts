@@ -4,11 +4,36 @@ import Utils from "../../utils/utils";
 import message from "../../../config/response_message";
 import User from "@models/users.model";
 
+export function me(req: Request | any, res: Response, next: NextFunction) {
+
+  const { id } = req.decoded;
+
+  userRepository.me(id)
+    .then((data: any) => {
+      res.json({
+        user: data
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.login.incorrect_userid;
+
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}
+
 export function login(req: Request, res: Response, next: NextFunction) {
 
-  const {email, password} = req.body;
+  const { email, password } = req.body;
 
-  userRepository.login({email, password})
+  userRepository.login({ email, password })
     .then((data: any) => {
       res.json({
         user: data
@@ -30,7 +55,6 @@ export function login(req: Request, res: Response, next: NextFunction) {
       })
     });
 }
-
 
 export function logout(req: Request | any, res: Response, next: NextFunction) {
 
@@ -104,7 +128,7 @@ export async function signupConfirm(req: Request | any, res: Response, next: Nex
     })
     .catch((err: any) => {
       console.log(`Error ${err}`);
-      
+
       let msg = message.login.signup_fail;
       if (err == "NO_TRANSACTION")
         msg = message.login.no_user;

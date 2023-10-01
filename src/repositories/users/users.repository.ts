@@ -8,7 +8,14 @@ import adminsRepository from "../admins/admins.repository";
 class UserRepository implements IUserRepository {
 
     public async me(id: string): Promise<User> {
-        return new User;
+
+        let user = await User.findOne({ 
+            attributes: { exclude: ['password', 'user_type', 'created_by', 'updated_by', 'token']},
+            where: { user_id: id } });
+
+        if (!user) return Promise.reject("NO_TRANSACTION");
+
+        return user;
     }
 
     public async login(_data: loginUserDto): Promise<User> {
