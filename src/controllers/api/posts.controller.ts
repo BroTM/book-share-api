@@ -234,3 +234,36 @@ export async function destroy(req: Request | any, res: Response, next: NextFunct
             })
         });
 }
+
+/*** @route /user/post/{post_id}/report */
+export async function report(req: Request | any, res: Response, next: NextFunction) {
+
+    const post_id = req.params.post_id;
+
+    // prevent sql injection
+    if (!Utils.isUUid(post_id)) {
+        return res.status(405).send({ message: message.req_err.err_405 })
+    }
+
+    const { id } = req.decoded;
+
+    postRepository.report(post_id, id)
+        .then((data: any) => {
+            res.json({
+                'post': data,
+            });
+        })
+        .catch((err: any) => {
+            console.log(`Error ${err}`);
+
+            let msg = message.other.something_wrong;
+            if (err == "NO_TRANSACTION")
+                msg = message.general.no_transaction;
+
+            res.json({
+                status: "fail",
+                data: err,
+                message: msg
+            })
+        });
+}

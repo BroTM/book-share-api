@@ -247,6 +247,60 @@ class PostRepository implements IPostRepository {
             return Promise.reject(err);
         }
     }
+
+    /** 
+     * JSON_Array.push(user_id)
+     * @PUT @route /user/post/{post_id}/report */
+    public async report(post_id: string, user_id: string): Promise<Post> {
+        try {
+            let post = await Post.findOne(
+                {
+                    include: [
+                        {
+                            model: Category,
+                            attributes: []
+                        }
+                    ],
+                    attributes: [
+                        'post_id', 'title', 'content', 'created_at', 'status', 'reported_user_ids',
+                        [Sequelize.literal('category.name'), 'category_name']
+                    ],
+                    where: {
+                        status: ['published', 'reported'],
+                        post_id: post_id
+                    }
+                }
+            );
+
+            // valid uuid, but not in table
+            if (!post) return Promise.reject("NO_TRANSACTION");
+
+            let arr: String[];
+            if (!Array.isArray(JSON.parse(post.reported_user_ids)))
+                arr = [];
+            else
+                arr = JSON.parse(post.reported_user_ids);
+
+            let found = arr.find((elm) => elm == user_id);
+
+            //prevent duplicate user_id
+            if(!found) 
+                arr.push(user_id);
+
+            post.updated_at = current_timestamp();
+            post.updated_by = user_id;
+            post.reported_user_ids = JSON.stringify(arr);
+
+            let affectedRows = await post.save();
+
+            let { reported_user_ids, updated_at, updated_by, ...withoutUpdateInfo } = post.dataValues;
+
+            return withoutUpdateInfo;
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
+    }
+
 }
 
 export default new PostRepository();
