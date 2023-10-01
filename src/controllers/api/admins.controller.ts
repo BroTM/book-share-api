@@ -3,7 +3,6 @@ import adminRepository from "../../repositories/admins/admins.repository";
 import Utils from "../../utils/utils";
 import message from "../../../config/response_message";
 import Admin from "@models/admins.model";
-import { Validate } from "sequelize-typescript";
 
 export function login(req: Request, res: Response, next: NextFunction) {
 
@@ -16,9 +15,8 @@ export function login(req: Request, res: Response, next: NextFunction) {
 
   adminRepository.login(req.body!)
     .then((data: any) => {
-      res.json({
-        'status': "success",
-        'data': { admin: { ...data } }
+      res.json({ 
+        admin: { ...data } 
       });
     })
     .catch((err: any) => {
