@@ -102,7 +102,6 @@ export async function detailForUser(req: Request | any, res: Response, next: Nex
         });
 }
 
-
 /** @route /users/me/posts/{post_id} */
 export async function detailByUserIdForUser(req: Request | any, res: Response, next: NextFunction) {
 
@@ -161,6 +160,77 @@ export async function create(req: Request | any, res: Response, next: NextFuncti
                 status: "fail",
                 data: process.env.NODE_ENV == "development" ? err : {},
                 message: message.general.create_fail
+            })
+        });
+}
+
+
+/*** @PUT @route /user/me/post/{post_id} */
+export async function publish(req: Request | any, res: Response, next: NextFunction) {
+
+    const post_id = req.params.post_id;
+
+    // prevent sql injection
+    if (!Utils.isUUid(post_id)) {
+        return res.status(405).send({ message: message.req_err.err_405 })
+    }
+
+    const { id } = req.decoded;
+
+    postRepository.publish(post_id, id)
+        .then((data: any) => {
+            res.json({
+                'post': data,
+            });
+        })
+        .catch((err: any) => {
+            console.log(`Error ${err}`);
+
+            let msg = message.other.something_wrong;
+            if (err == "NO_TRANSACTION")
+                msg = message.general.no_transaction;
+            else if (err == "ALREADY_PUBLISHED")
+                msg = message.post.already_published;
+            else if (err == "REPORTED_POST")
+                msg = message.post.reported_post;
+
+            res.json({
+                status: "fail",
+                data: err,
+                message: msg
+            })
+        });
+}
+
+/*** @PUT @route /user/me/post/{post_id} */
+export async function destroy(req: Request | any, res: Response, next: NextFunction) {
+
+    const post_id = req.params.post_id;
+
+    // prevent sql injection
+    if (!Utils.isUUid(post_id)) {
+        return res.status(405).send({ message: message.req_err.err_405 })
+    }
+
+    const { id } = req.decoded;
+
+    postRepository.destroy(post_id, id)
+        .then((data: any) => {
+            res.json({
+                message: message.post.delete_success
+            });
+        })
+        .catch((err: any) => {
+            console.log(`Error ${err}`);
+
+            let msg = message.other.something_wrong;
+            if (err == "NO_TRANSACTION")
+                msg = message.general.no_transaction;
+
+            res.json({
+                status: "fail",
+                data: err,
+                message: msg
             })
         });
 }

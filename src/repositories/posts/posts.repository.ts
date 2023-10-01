@@ -6,6 +6,7 @@ import { paginateDto } from "@dtos/common.dto";
 import Category from "@models/categories.model";
 import Database from "../../database/mysql";
 import { QueryTypes, Sequelize } from "sequelize";
+import { current_timestamp } from "../../utils/common";
 
 const db = new Database();
 
@@ -167,6 +168,82 @@ class PostRepository implements IPostRepository {
             return { ...withoutUpdateInfo, category_name: category?.name };
         } catch (err: any) {
 
+            return Promise.reject(err);
+        }
+    }
+
+    /** 
+     * draft to publish
+     * auth user must be owner
+     * @PUT @route /user/me/post/{post_id} */
+    public async publish(post_id: string, user_id: string): Promise<Post> {
+        try {
+            let post = await Post.findOne(
+                {
+                    include: [
+                        {
+                            model: Category,
+                            attributes: []
+                        }
+                    ],
+                    attributes: [
+                        'post_id', 'title', 'content', 'created_at', 'status',
+                        [Sequelize.literal('category.name'), 'category_name']
+                    ],
+                    where: {
+                        post_id: post_id,
+                        created_by: user_id
+                    }
+                }
+            );
+
+            // may be it not post ower
+            if (!post) return Promise.reject("NO_TRANSACTION");
+
+            // user fault
+            if (post.status == "published")
+                return Promise.reject('ALREADY_PUBLISHED');
+
+            if (post.status == "reported")
+                return Promise.reject('REPORTED_POST');
+
+            post.status = 'published';
+            post.updated_at = current_timestamp();
+            post.updated_by = user_id;
+            //make more other colum, update
+
+            let affectedRows = await post.save();
+
+            let { updated_at, updated_by, ...withoutUpdateInfo } = post.dataValues;
+
+            return withoutUpdateInfo;
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
+    }
+
+    /** 
+     * auth user must be owner
+     * @delete @route /user/me/post/{post_id} 
+     * */
+    public async destroy(post_id: string, user_id: string): Promise<void> {
+        try {
+            let post = await Post.findOne(
+                {
+                    where: {
+                        post_id: post_id,
+                        created_by: user_id
+                    }
+                }
+            );
+
+            // may be it not post ower
+            if (!post) return Promise.reject("NO_TRANSACTION");
+
+            let affectedRows = await post.destroy();
+
+            return;
+        } catch (err: any) {
             return Promise.reject(err);
         }
     }

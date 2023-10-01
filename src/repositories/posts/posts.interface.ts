@@ -27,4 +27,10 @@ export interface IPostRepository {
 
     /** @route /user/post */
     create: (data: Post) => Promise<Post>;
+
+    /** @put @route /user/me/post/{post_id} */
+    publish: (post_id: string, user_id: string) => Promise<Post>;
+
+    /** @delete @route /user/me/post/{post_id} */
+    destroy: (post_id: string, user_id: string) => Promise<void>;
 }

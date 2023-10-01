@@ -34,5 +34,7 @@ apiRouter.get("/users/posts", verifyToken, authorize(Role.User), PostController.
 apiRouter.get("/users/posts/:post_id", verifyToken, authorize(Role.User), PostController.detailForUser);
 apiRouter.get("/users/me/posts", verifyToken, authorize(Role.User), PostController.allPostsByUserIdForUsers);
 apiRouter.get("/users/me/posts/:post_id", verifyToken, authorize(Role.User), PostController.detailByUserIdForUser);
+apiRouter.put("/users/me/posts/:post_id", verifyToken, authorize(Role.User), PostController.publish);
+apiRouter.delete("/users/me/posts/:post_id", verifyToken, authorize(Role.User), PostController.destroy);
 
 export default apiRouter;

@@ -26,5 +26,10 @@ export default{
         'signup_fail': "Signup fail!",
         'donot_match': `Password doesn't match`,
         'success_change_password': 'Changing password successfully!'
+    },
+    post: {
+        'already_published': 'Post is already published!',
+        'reported_post': 'It is reported post!',
+        'delete_success': 'Post have been deleted successfully!'
     }
 }
