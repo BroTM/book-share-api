@@ -2,7 +2,7 @@ import momentTimezone from "moment-timezone";
 import moment from "moment";
 
 export function current_timestamp() {
-    return momentTimezone.tz('Asia/Yangon').format('yyMMDHHmmss');
+    return parseInt(momentTimezone.tz('Asia/Yangon').format('yyMMDHHmmss'));
 }
 
 export function format_date(value: string) {

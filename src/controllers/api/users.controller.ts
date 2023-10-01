@@ -60,6 +60,35 @@ export function bioUpdate(req: Request | any, res: Response, next: NextFunction)
     });
 }
 
+export function changePassword(req: Request | any, res: Response, next: NextFunction) {
+
+  const { current_password, new_password, confirm_password } = req.body;
+  const { id } = req.decoded;
+
+  userRepository.changePassword(id, { current_password, new_password, confirm_password })
+    .then((data: any) => {
+      res.json({
+        message: message.login.success_change_password
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.login.incorrect_userid;
+      else if (err == "INCORRECT_PASSWORD")
+        msg = message.login.incorrect_password;
+      else if (err == "DO_NOT_MATCH_PASSWORD")
+        msg = message.login.donot_match
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}
+
 export function login(req: Request, res: Response, next: NextFunction) {
 
   const { email, password } = req.body;

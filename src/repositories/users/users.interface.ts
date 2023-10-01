@@ -7,7 +7,7 @@ export interface IUserRepository {
     bioUpdate: (id: string, data: bioUpdateDto) => Promise<User>;
     signup: (data: User) => Promise<void>;
     signupConfirm: (data: signUpConfirmDto) => Promise<User>;
-    changePassword: (data: changePasswordDto) => Promise<void>;
+    changePassword: (id: string, data: changePasswordDto) => Promise<void>;
     forgetPassword: (email: string) => Promise<void>;
     resetPassword: (data: resetPasswordDto) => Promise<void>;
     logout: (id: string) => Promise<void>;

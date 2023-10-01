@@ -23,6 +23,8 @@ export default{
         'please_login': 'Please login first',
         'logout_success': 'Logout successfully.',
         'no_user': `User doesn't exist`,
-        'signup_fail': "Signup fail!"
+        'signup_fail': "Signup fail!",
+        'donot_match': `Password doesn't match`,
+        'success_change_password': 'Changing password successfully!'
     }
 }

@@ -8,6 +8,11 @@ import { current_timestamp } from "../../utils/common";
 
 class UserRepository implements IUserRepository {
 
+    /**
+     * 
+     * @param id 
+     * @returns User Info
+     */
     public async me(id: string): Promise<User> {
 
         try{
@@ -50,6 +55,37 @@ class UserRepository implements IUserRepository {
             return user!;
         } catch(err: any) {
             
+            return Promise.reject(err);
+        }
+    }
+
+    public async changePassword(_id: string, _data: changePasswordDto): Promise<void> {
+        try {
+            if(_data.new_password !== _data.confirm_password)
+                return Promise.reject("DO_NOT_MATCH_PASSWORD");
+
+            let user = await User.findOne({ attributes: ['password', 'user_id'], where: { user_id: _id } });
+
+            if (!user) return Promise.reject("NO_TRANSACTION");
+
+            //check old password
+            let match = await bcrypt.compareSync(_data.current_password, user.password);
+
+            if (!match)
+                return Promise.reject("INCORRECT_PASSWORD");
+
+            //new password
+            const salt = bcrypt.genSaltSync(10);
+
+            let hashPassword = await bcrypt.hashSync(_data.new_password, salt);
+            
+            user.password = hashPassword;
+            user.updated_at = current_timestamp();
+
+            let affectedRows = await user.save();
+
+            return;
+        } catch (err: any) {
             return Promise.reject(err);
         }
     }
@@ -132,9 +168,6 @@ class UserRepository implements IUserRepository {
 
             return Promise.reject(err);
         }
-    }
-    public async changePassword(data: changePasswordDto): Promise<void> {
-
     }
     public async forgetPassword(email: string): Promise<void> {
 

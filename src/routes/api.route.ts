@@ -10,6 +10,7 @@ const apiRouter = Router();
 
 apiRouter.get("/users/me",verifyToken, authorize(Role.User), UserController.me);
 apiRouter.put("/users/me", verifyToken, authorize(Role.User), UserController.bioUpdate);
+apiRouter.put("/users/change-password", verifyToken, authorize(Role.User), UserController.changePassword);
 
 apiRouter.post("/users/signup", UserController.signup);
 apiRouter.post("/users/signup-confirm", UserController.signupConfirm);
