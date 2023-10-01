@@ -81,6 +81,7 @@ class UserRepository implements IUserRepository {
             
             user.password = hashPassword;
             user.updated_at = current_timestamp();
+            user.updated_by = _id;
 
             let affectedRows = await user.save();
 
@@ -102,7 +103,7 @@ class UserRepository implements IUserRepository {
                 return Promise.reject("INCORRECT_PASSWORD");
 
             const _token = await adminsRepository.generateToken(user.user_id, 'USER', 'LOGIN', user.user_name);
-            const affectedRows = await User.update({ token: _token }, { where: { user_id: user.user_id } })
+            // const affectedRows = await User.update({ token: _token }, { where: { user_id: user.user_id } })
             
             const { password, user_type, created_by, updated_by, ...withoutSomeAttribute } = user.dataValues;
             withoutSomeAttribute.token = _token;
@@ -136,6 +137,7 @@ class UserRepository implements IUserRepository {
                 token: _token
             })
 
+            // smtp service here
             return;
         } catch (err: any) {
 
@@ -169,12 +171,71 @@ class UserRepository implements IUserRepository {
             return Promise.reject(err);
         }
     }
+
     public async forgetPassword(email: string): Promise<void> {
+        
+        try{
+          
+            let user = await User.findOne({ attributes: ['user_id', 'user_name'], where: { email: email } });
+    
+            if (!user) return Promise.reject("NO_TRANSACTION");
+    
+            const _token = await adminsRepository.generateToken(email!, 'USER', 'REGISTER', user.user_name);
 
-    }
-    public async resetPassword(data: resetPasswordDto): Promise<void> {
+            // update with confirmation token
+            user.token = _token;
+            let affectedRows = await user.save();
 
+            //smtp service here
+
+            return;
+            } catch(err: any) {
+
+                return Promise.reject(err);
+            }
     }
+
+    /**
+     * reset password with token from email service
+     * @param _data 
+     * @returns User
+     */
+    public async resetPassword(_data: resetPasswordDto): Promise<User> {
+        try {
+            if(_data.new_password !== _data.confirm_password)
+                return Promise.reject("DO_NOT_MATCH_PASSWORD");
+
+            let user = await User.findOne({ 
+                attributes: {exclude: ['password', 'user_type', 'created_by', 'updated_by']},
+                where: { token: _data.token } 
+            });
+
+            if (!user) return Promise.reject("NO_TRANSACTION");
+
+            //new password
+            const salt = bcrypt.genSaltSync(10);
+
+            let hashPassword = await bcrypt.hashSync(_data.new_password, salt);
+
+            user.password = hashPassword;
+            user.updated_at = current_timestamp();
+            user.updated_by = user.user_id;
+
+            let affectedRows = await user.save();
+
+            //for user login
+            const _token = await adminsRepository.generateToken(user.user_id!, 'USER', 'LOGIN', user.user_name);
+
+            const { password, token, updated_by, ...withoutPassword } = user.dataValues;
+            withoutPassword.token = _token;
+
+            return withoutPassword;
+        } catch (err: any) {
+
+            return Promise.reject(err);
+        }
+    }
+
     public async logout(id: string): Promise<void> {
         try {
             let user= await User.findOne({ where: { user_id: id } });

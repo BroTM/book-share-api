@@ -9,7 +9,7 @@ export interface IUserRepository {
     signupConfirm: (data: signUpConfirmDto) => Promise<User>;
     changePassword: (id: string, data: changePasswordDto) => Promise<void>;
     forgetPassword: (email: string) => Promise<void>;
-    resetPassword: (data: resetPasswordDto) => Promise<void>;
+    resetPassword: (data: resetPasswordDto) => Promise<User>;
     logout: (id: string) => Promise<void>;
     me: (id: string) => Promise<User>;
 }

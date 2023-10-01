@@ -15,6 +15,7 @@ export class signUpConfirmDto {
 }
 
 export class resetPasswordDto {
+    declare token: string;
     declare new_password: string;
     declare confirm_password: string;
 }

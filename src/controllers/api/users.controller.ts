@@ -200,3 +200,54 @@ export async function signupConfirm(req: Request | any, res: Response, next: Nex
       })
     });
 }
+
+export async function forgetPassword(req: Request | any, res: Response, next: NextFunction) {
+
+  const { email } = req.body;
+  
+  userRepository.forgetPassword(email)
+    .then((data: any) => {
+      res.json({
+        message: `Verfification has been sent to ${email}`
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.login.no_user;
+
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}
+
+export function resetPassword(req: Request | any, res: Response, next: NextFunction) {
+
+  const { token, new_password, confirm_password } = req.body;
+
+  userRepository.resetPassword({ token, new_password, confirm_password })
+    .then((data: any) => {
+      res.json({
+        user: data
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.login.incorrect_userid;
+      else if (err == "DO_NOT_MATCH_PASSWORD")
+        msg = message.login.donot_match
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}

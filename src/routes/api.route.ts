@@ -14,6 +14,9 @@ apiRouter.put("/users/change-password", verifyToken, authorize(Role.User), UserC
 
 apiRouter.post("/users/signup", UserController.signup);
 apiRouter.post("/users/signup-confirm", UserController.signupConfirm);
+apiRouter.post("/users/forget-password", UserController.forgetPassword);
+apiRouter.put("/users/reset-password", UserController.resetPassword);
+
 apiRouter.post("/users/login", UserController.login);
 apiRouter.post("/users/logout", verifyToken, authorize(Role.User), UserController.logout);
 
