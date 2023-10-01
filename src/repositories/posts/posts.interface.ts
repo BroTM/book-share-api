@@ -20,7 +20,7 @@ export interface IPostRepository {
     detailByUserIdForUser: (post_id: string, user_id: string) => Promise<Post>;
 
     /** @route /admin/users/{user_id}/posts/{post_id} */
-    detailByUserIdForAdmin: (post_id: string, user_id?: string) => Promise<Post>;
+    detailByUserIdForAdmin: (post_id: string, user_id: string) => Promise<Post>;
 
     /** @route /admin/posts/{post_id}/status */
     suspendPost: (post_id: string) => Promise<Post>;

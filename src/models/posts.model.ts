@@ -85,10 +85,15 @@ class Post extends Model {
     })
     declare created_at: number;
 
+    @ForeignKey(() => User)
     @Column({
         type: DataType.STRING(45)
     })
     declare updated_by?: string;
+
+    
+    @BelongsTo(() => User, 'updated_by')
+    declare updated_user: User;
 
     @IsNumeric
     @Column({

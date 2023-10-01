@@ -38,4 +38,8 @@ apiRouter.put("/users/me/posts/:post_id", verifyToken, authorize(Role.User), Pos
 apiRouter.delete("/users/me/posts/:post_id", verifyToken, authorize(Role.User), PostController.destroy);
 apiRouter.post("/users/posts/:post_id/report", verifyToken, authorize(Role.User), PostController.report);
 
+/** posts by admins */
+apiRouter.get("/admins/users/:user_id/posts", verifyToken, authorize(Role.Admin), PostController.allPostsByUserIdForAdmin);
+apiRouter.get("/admins/users/:user_id/posts/:post_id", verifyToken, authorize(Role.Admin), PostController.detailByUserIdForAdmin);
+
 export default apiRouter;

@@ -7,14 +7,46 @@ import Category from "@models/categories.model";
 import Database from "../../database/mysql";
 import { QueryTypes, Sequelize } from "sequelize";
 import { current_timestamp } from "../../utils/common";
+import User from "@models/users.model";
 
 const db = new Database();
 
 class PostRepository implements IPostRepository {
 
-    /** @route /admin/users/{user_id}/posts */
-    public async allPostsByUserIdForAdmin(args: paginateDto, user_id: string): Promise<Post[]> {
-        return [];
+    /** 
+     * all no draft post
+     * @route /admin/users/{user_id}/posts */
+    public async allPostsByUserIdForAdmin(_args: paginateDto, user_id: string): Promise<Post[] | any> {
+
+        try {
+
+            let queryStr = `
+            select p.post_id, p.title, p.content, p.status, p.created_at, p.updated_at, 
+            cat.name as category_name,
+            c_user.user_name as created_name,
+            u_user.user_name as updated_name
+            from posts p
+            inner join categories cat on p.category_id = cat.category_id
+            inner join users c_user on p.created_by = c_user.user_id
+            left join users u_user on p.updated_by = u_user.user_id
+            where p.status != 'draft' and p.created_by = ?
+            order by p.created_at desc
+            limit ? offset ?`;
+
+            let posts = await db.sequelize?.query(
+                queryStr, {
+                model: Post,
+                mapToModel: true,
+                replacements: [user_id, _args.limit, _args.page * _args.limit],
+                type: QueryTypes.SELECT
+            });
+
+            let totalRow = await Post.count({ where: { status: ['reported', 'published'] } });
+
+            return { posts: posts, total: totalRow };
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
     }
 
     /** @route /users/posts */
@@ -140,8 +172,47 @@ class PostRepository implements IPostRepository {
     }
 
     /** @route /admin/users/{user_id}/posts/{post_id} */
-    public async detailByUserIdForAdmin(post_id: string, user_id?: string): Promise<Post> {
-        return new Post;
+    public async detailByUserIdForAdmin(post_id: string, user_id: string): Promise<Post> {
+        try {
+            let post = await Post.findOne(
+                {
+                    include: [
+                        {
+                            model: Category,
+                            attributes: []
+                        },
+                        {
+                            model: User,
+                            attributes: [],
+                            as: "created_user"
+                        },
+                        {
+                            model: User,
+                            attributes: [],
+                            as: "updated_user"
+                        }
+                    ],
+                    attributes: [
+                        'post_id', 'title', 'content', 'created_at', 'status', 'updated_at',
+                        [Sequelize.literal('category.name'), 'category_name'],
+                        [Sequelize.literal('created_user.user_name'), 'created_name'],
+                        [Sequelize.literal('updated_user.user_name'), 'updated_name']
+
+                    ],
+                    where: {
+                        post_id: post_id,
+                        status: ['reported', 'published'],
+                        created_by: user_id
+                    }
+                }
+            );
+
+            if (!post) return Promise.reject("NO_TRANSACTION");
+
+            return post;
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
     }
 
     /** @oute /admin/posts/{post_id}/status */
@@ -284,7 +355,7 @@ class PostRepository implements IPostRepository {
             let found = arr.find((elm) => elm == user_id);
 
             //prevent duplicate user_id
-            if(!found) 
+            if (!found)
                 arr.push(user_id);
 
             post.updated_at = current_timestamp();

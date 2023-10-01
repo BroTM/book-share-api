@@ -36,6 +36,81 @@ export async function allPostsForUsers(req: Request | any, res: Response, next: 
         });
 }
 
+/** @route /admin/users/{user_id}/posts */
+export async function allPostsByUserIdForAdmin(req: Request | any, res: Response, next: NextFunction) {
+    let page = req.query.page;
+    let limit = req.query.limit
+
+    const user_id = req.params.user_id;
+
+    // prevent sql injection
+    if (!Utils.isNumber(page) || !Utils.isNumber(limit)) {
+        return res.status(405).send({ message: message.req_err.err_405 })
+    }
+
+    // prevent sql injection
+    if (!Utils.isUUid(user_id)) {
+        return res.status(405).send({ message: message.req_err.err_405 })
+    }
+
+    postRepository.allPostsByUserIdForAdmin({ page: parseInt(page), limit: parseInt(limit) }, user_id)
+        .then((data: any) => {
+            res.json({
+                'post': data.posts,
+                'pagination': {
+                    'page': page,
+                    'limit': limit,
+                    'total': data.total
+                }
+            });
+        })
+        .catch((err: any) => {
+            console.log(`Error ${err}`);
+
+            res.json({
+                status: "fail",
+                data: err,
+                message: message.other.something_wrong
+            })
+        });
+}
+
+/** @route /admins/users/{user_id}/posts/{post_id} */
+export async function detailByUserIdForAdmin(req: Request | any, res: Response, next: NextFunction) {
+
+    const post_id = req.params.post_id;
+    const user_id = req.params.user_id;
+
+    // prevent sql injection
+    if (!Utils.isUUid(post_id)) {
+        return res.status(405).send({ message: message.req_err.err_405 })
+    }
+
+    // prevent sql injection
+    if (!Utils.isUUid(user_id)) {
+        return res.status(405).send({ message: message.req_err.err_405 })
+    }
+
+    postRepository.detailByUserIdForAdmin(post_id, user_id)
+        .then((data: any) => {
+            res.json({
+                'post': data,
+            });
+        })
+        .catch((err: any) => {
+            console.log(`Error ${err}`);
+
+            let msg = message.other.something_wrong;
+            if (err == "NO_TRANSACTION")
+                msg = message.general.no_transaction;
+
+            res.json({
+                status: "fail",
+                data: err,
+                message: msg
+            })
+        });
+}
 
 /** @route /users/posts */
 export async function allPostsByUserIdForUsers(req: Request | any, res: Response, next: NextFunction) {
