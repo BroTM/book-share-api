@@ -8,4 +8,14 @@ export function current_timestamp() {
 export function format_date(value: string) {
     return moment(value).format('yyMMDHHmmss');
 }
-  
+
+export function paginate(query: any, page: number, pageSize: number) {
+    const offset = page * pageSize;
+    const limit = pageSize;
+
+    return {
+        offset: offset,
+        limit: limit,
+        ...query
+    };
+};
