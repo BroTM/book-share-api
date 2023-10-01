@@ -4,11 +4,14 @@ import bcrypt from "bcrypt";
 
 import { IUserRepository } from "./users.interface";
 import adminsRepository from "../admins/admins.repository";
+import { current_timestamp } from "../../utils/common";
 
 class UserRepository implements IUserRepository {
 
     public async me(id: string): Promise<User> {
 
+        try{
+          
         let user = await User.findOne({ 
             attributes: { exclude: ['password', 'user_type', 'created_by', 'updated_by', 'token']},
             where: { user_id: id } });
@@ -16,6 +19,39 @@ class UserRepository implements IUserRepository {
         if (!user) return Promise.reject("NO_TRANSACTION");
 
         return user;
+        } catch(err: any) {
+
+            return Promise.reject(err);
+        }
+    }
+
+    /**
+     * updateAt, updated_by
+     * @param id 
+     * @param _data 
+     * @returns 
+     */
+    public async bioUpdate(id: string, _data: bioUpdateDto): Promise<User> {
+        try{
+            let updatedAt = current_timestamp();
+            const affectedRows = await User.update(
+                {bio: _data.bio, user_name: _data.user_name, updated_at: updatedAt, updated_by: id}, 
+                {where: { user_id: id }}
+                );
+
+            if(!affectedRows)
+                return Promise.reject("UPDATE_FAIL");
+
+            const user = await User.findOne({
+                attributes: { exclude: ['password', 'user_type', 'created_by', 'updated_by', 'token']},
+                where: { user_id: id } 
+            });
+
+            return user!;
+        } catch(err: any) {
+            
+            return Promise.reject(err);
+        }
     }
 
     public async login(_data: loginUserDto): Promise<User> {
@@ -40,10 +76,6 @@ class UserRepository implements IUserRepository {
         } catch (err: any) {
             return Promise.reject(err);
         }
-    }
-    public async bioUpdate(data: bioUpdateDto): Promise<User> {
-
-        return new User;
     }
 
     /**

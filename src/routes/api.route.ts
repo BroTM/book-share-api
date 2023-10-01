@@ -9,6 +9,7 @@ import { Router } from "express";
 const apiRouter = Router();
 
 apiRouter.get("/users/me",verifyToken, authorize(Role.User), UserController.me);
+apiRouter.put("/users/me", verifyToken, authorize(Role.User), UserController.bioUpdate);
 
 apiRouter.post("/users/signup", UserController.signup);
 apiRouter.post("/users/signup-confirm", UserController.signupConfirm);

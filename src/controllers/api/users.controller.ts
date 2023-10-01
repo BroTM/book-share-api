@@ -29,6 +29,37 @@ export function me(req: Request | any, res: Response, next: NextFunction) {
     });
 }
 
+export function bioUpdate(req: Request | any, res: Response, next: NextFunction) {
+
+  const { id } = req.decoded;
+  const { user_name, bio} = req.body;
+
+  // prevent special character
+  if (!Utils.isNoSpecialChar(user_name)) {
+    return res.status(405).send({ message: message.req_err.err_405 })
+  }
+
+  userRepository.bioUpdate(id, {user_name, bio})
+    .then((data: any) => {
+      res.json({
+        user: data
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.login.incorrect_userid;
+
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}
+
 export function login(req: Request, res: Response, next: NextFunction) {
 
   const { email, password } = req.body;

@@ -4,7 +4,7 @@ import { loginUserDto, changePasswordDto, resetPasswordDto, signUpConfirmDto, bi
 
 export interface IUserRepository {
     login: (data: loginUserDto) => Promise<User>;
-    bioUpdate: (data: bioUpdateDto) => Promise<User>;
+    bioUpdate: (id: string, data: bioUpdateDto) => Promise<User>;
     signup: (data: User) => Promise<void>;
     signupConfirm: (data: signUpConfirmDto) => Promise<User>;
     changePassword: (data: changePasswordDto) => Promise<void>;

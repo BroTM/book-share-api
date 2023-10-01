@@ -36,6 +36,10 @@ class Utils {
     return (typeof value === "string" && value.length == 8 && value.match(/^[a-zA-Z0-9]+$/i)) ? true : false;
   }
 
+  public static isNoSpecialChar(value: string): Boolean {
+    return (typeof value === "string" && value.match(/^[a-zA-Z0-9]+$/i)) ? true : false;
+  }
+
   public static validateDateFormat(value: any) {
     value = Utils.isNumber(value) ? parseInt(value) : value;
 
