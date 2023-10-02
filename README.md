@@ -35,7 +35,7 @@ DB_TIMEZONE=+00:00
 Secret Key for JWT:
 ```bash
 ADMIN_SECRET_KEY=YOUR_SECRET_KEY
-```;
+```
 
 ## Getting started
 
