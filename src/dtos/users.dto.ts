@@ -24,3 +24,8 @@ export class bioUpdateDto {
     declare user_name: string;
     declare bio: string;
 }
+
+export class filterForAdminDto {
+    declare status: 'no_verify' | 'verified' | 'suspended';
+    declare user_type: 'normal' | 'premium';
+}

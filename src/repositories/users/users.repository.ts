@@ -1,10 +1,15 @@
 import User from "@models/users.model";
-import { loginUserDto, changePasswordDto, resetPasswordDto, signUpConfirmDto, bioUpdateDto } from "@dtos/users.dto";
+import { loginUserDto, changePasswordDto, resetPasswordDto, signUpConfirmDto, bioUpdateDto, filterForAdminDto } from "@dtos/users.dto";
 import bcrypt from "bcrypt";
 
 import { IUserRepository } from "./users.interface";
 import adminsRepository from "../admins/admins.repository";
 import { current_timestamp } from "../../utils/common";
+import { paginateDto, updateUserInfoDto } from "@dtos/common.dto";
+import { QueryTypes } from "sequelize";
+import Database from "../../database/mysql";
+
+const db = new Database();
 
 class UserRepository implements IUserRepository {
 
@@ -15,16 +20,17 @@ class UserRepository implements IUserRepository {
      */
     public async me(id: string): Promise<User> {
 
-        try{
-          
-        let user = await User.findOne({ 
-            attributes: { exclude: ['password', 'user_type', 'created_by', 'updated_by', 'token']},
-            where: { user_id: id } });
+        try {
 
-        if (!user) return Promise.reject("NO_TRANSACTION");
+            let user = await User.findOne({
+                attributes: { exclude: ['password', 'user_type', 'created_by', 'updated_by', 'token'] },
+                where: { user_id: id }
+            });
 
-        return user;
-        } catch(err: any) {
+            if (!user) return Promise.reject("NO_TRANSACTION");
+
+            return user;
+        } catch (err: any) {
 
             return Promise.reject(err);
         }
@@ -37,31 +43,31 @@ class UserRepository implements IUserRepository {
      * @returns 
      */
     public async bioUpdate(id: string, _data: bioUpdateDto): Promise<User> {
-        try{
+        try {
             let updatedAt = current_timestamp();
             const affectedRows = await User.update(
-                {bio: _data.bio, user_name: _data.user_name, updated_at: updatedAt, updated_by: id}, 
-                {where: { user_id: id }}
-                );
+                { bio: _data.bio, user_name: _data.user_name, updated_at: updatedAt, updated_by: id },
+                { where: { user_id: id } }
+            );
 
-            if(!affectedRows)
+            if (!affectedRows)
                 return Promise.reject("UPDATE_FAIL");
 
             const user = await User.findOne({
-                attributes: { exclude: ['password', 'user_type', 'created_by', 'updated_by', 'token']},
-                where: { user_id: id } 
+                attributes: { exclude: ['password', 'user_type', 'created_by', 'updated_by', 'token'] },
+                where: { user_id: id }
             });
 
             return user!;
-        } catch(err: any) {
-            
+        } catch (err: any) {
+
             return Promise.reject(err);
         }
     }
 
     public async changePassword(_id: string, _data: changePasswordDto): Promise<void> {
         try {
-            if(_data.new_password !== _data.confirm_password)
+            if (_data.new_password !== _data.confirm_password)
                 return Promise.reject("DO_NOT_MATCH_PASSWORD");
 
             let user = await User.findOne({ attributes: ['password', 'user_id'], where: { user_id: _id } });
@@ -78,10 +84,10 @@ class UserRepository implements IUserRepository {
             const salt = bcrypt.genSaltSync(10);
 
             let hashPassword = await bcrypt.hashSync(_data.new_password, salt);
-            
+
             user.password = hashPassword;
             user.updated_at = current_timestamp();
-            user.updated_by = _id;
+            // user.updated_by = _id;
 
             let affectedRows = await user.save();
 
@@ -104,7 +110,7 @@ class UserRepository implements IUserRepository {
 
             const _token = await adminsRepository.generateToken(user.user_id, 'USER', 'LOGIN', user.user_name);
             // const affectedRows = await User.update({ token: _token }, { where: { user_id: user.user_id } })
-            
+
             const { password, user_type, created_by, updated_by, ...withoutSomeAttribute } = user.dataValues;
             withoutSomeAttribute.token = _token;
 
@@ -173,13 +179,13 @@ class UserRepository implements IUserRepository {
     }
 
     public async forgetPassword(email: string): Promise<void> {
-        
-        try{
-          
+
+        try {
+
             let user = await User.findOne({ attributes: ['user_id', 'user_name'], where: { email: email } });
-    
+
             if (!user) return Promise.reject("NO_TRANSACTION");
-    
+
             const _token = await adminsRepository.generateToken(email!, 'USER', 'REGISTER', user.user_name);
 
             // update with confirmation token
@@ -189,10 +195,10 @@ class UserRepository implements IUserRepository {
             //smtp service here
 
             return;
-            } catch(err: any) {
+        } catch (err: any) {
 
-                return Promise.reject(err);
-            }
+            return Promise.reject(err);
+        }
     }
 
     /**
@@ -202,12 +208,12 @@ class UserRepository implements IUserRepository {
      */
     public async resetPassword(_data: resetPasswordDto): Promise<User> {
         try {
-            if(_data.new_password !== _data.confirm_password)
+            if (_data.new_password !== _data.confirm_password)
                 return Promise.reject("DO_NOT_MATCH_PASSWORD");
 
-            let user = await User.findOne({ 
-                attributes: {exclude: ['password', 'user_type', 'created_by', 'updated_by']},
-                where: { token: _data.token } 
+            let user = await User.findOne({
+                attributes: { exclude: ['password', 'user_type', 'created_by', 'updated_by'] },
+                where: { token: _data.token }
             });
 
             if (!user) return Promise.reject("NO_TRANSACTION");
@@ -219,7 +225,7 @@ class UserRepository implements IUserRepository {
 
             user.password = hashPassword;
             user.updated_at = current_timestamp();
-            user.updated_by = user.user_id;
+            // user.updated_by = user.user_id;
 
             let affectedRows = await user.save();
 
@@ -238,20 +244,133 @@ class UserRepository implements IUserRepository {
 
     public async logout(id: string): Promise<void> {
         try {
-            let user= await User.findOne({ where: { user_id: id } });
-      
+            let user = await User.findOne({ where: { user_id: id } });
+
             if (!user) return Promise.reject("NO_TRANSACTION");
-      
+
             //   const token = await adminsRepository.generateToken(id, 'USER', 'LOGOUT', user.user_name);
             //   const affectedRows = await User.update({token: token}, {where: {login_id: user.user_id}});
-      
-              return;
-          } catch (err: any) {
+
+            return;
+        } catch (err: any) {
             return Promise.reject(err);
-          }
+        }
     }
-    public async register(data: User): Promise<User> {
-        return new User;
+
+    /** @route /admins/users */
+    public async allUsersForAdmin(_args: paginateDto, _filter_args: filterForAdminDto): Promise<User[] | any> {
+
+        try {
+
+            let queryStr = `
+            select u.user_id, u.user_name, u.email, u.bio, u.user_type, u.status, u.created_at, u.updated_at,
+            u_user.name as updated_name
+            from users u
+            left join admins u_user on u.updated_by = u_user.login_id
+            where u.status = ? and u.user_type = ?
+            order by u.created_at desc
+            limit ? offset ?`;
+
+            let users = await db.sequelize?.query(
+                queryStr, {
+                model: User,
+                mapToModel: true,
+                replacements: [_filter_args.status, _filter_args.user_type, _args.limit, _args.page * _args.limit],
+                type: QueryTypes.SELECT
+            });
+
+            let totalRow = await User.count({ where: { status: _filter_args.status, user_type: _filter_args.user_type } });
+
+            return { users: users, total: totalRow };
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
+    }
+
+    /** @route /admins/users/{user_id} */
+    public async getOne(id: string): Promise<User | any> {
+
+        try {
+
+            let queryStr = `
+            select u.user_id, u.user_name, u.email, u.bio, u.user_type, u.status, u.created_at, u.updated_at,
+            u_user.name as updated_name
+            from users u
+            left join admins u_user on u.updated_by = u_user.login_id
+            where u.user_id = ?`;
+
+            let users = await db.sequelize?.query(
+                queryStr, {
+                model: User,
+                mapToModel: true,
+                replacements: [id],
+                type: QueryTypes.SELECT
+            });
+
+            if (!users || !users.length) return Promise.reject("NO_TRANSACTION");
+
+            return users[0];
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
+    }
+
+
+    /** @oute /admin/users/{user_id}/status */
+    public async suspend(_user_id: string, _updated_user: updateUserInfoDto): Promise<User> {
+        try {
+            let user = await User.findOne(
+                {
+                    attributes: {
+                        exclude: ['password', 'token']
+                    },
+                    where: {
+                        user_id: _user_id
+                    }
+                }
+            );
+
+            if (!user) return Promise.reject("NO_TRANSACTION");
+
+            // user fault
+            if (user.status == "suspended")
+                return Promise.reject('ALREADY_SUSPENDED');
+
+            user.status = 'suspended';
+            user.updated_at = current_timestamp();
+            user.updated_by = _updated_user.id;
+
+            let affectedRows = await user.save();
+
+            let { updated_by, ...withoutUpdateBy } = user.dataValues;
+
+            return { ...withoutUpdateBy, updated_name: _updated_user.name };
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
+    }
+
+    /** 
+     * @delete @route /admin/users/{user_id}
+     * */
+    public async destroy(id: string): Promise<void> {
+        try {
+            let user = await User.findOne(
+                {
+                    where: {
+                        user_id: id,
+                    }
+                }
+            );
+
+            if (!user) return Promise.reject("NO_TRANSACTION");
+
+            let affectedRows = await user.destroy();
+
+            return;
+        } catch (err: any) {
+            return Promise.reject(err);
+        }
     }
 }
 

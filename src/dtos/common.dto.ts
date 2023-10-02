@@ -14,3 +14,8 @@ export class DataStoredInToken {
     declare token_status: "REGISTER" | "LOGIN" | "LOGOUT";
     declare name: string;
 }
+
+export class updateUserInfoDto {
+    declare id: string;
+    declare name: string;
+}

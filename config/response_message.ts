@@ -33,6 +33,10 @@ export default{
         'reported_post': 'It is reported post!',
         'delete_success': 'Post have been deleted successfully!'
     },
+    user: {
+        'already_suspended': 'User is already suspended!',
+        'delete_success': 'User have been deleted successfully!'
+    },
     category: {
         'delete_success': 'Category have been deleted successfully!'
     }

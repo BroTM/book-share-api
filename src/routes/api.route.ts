@@ -23,6 +23,12 @@ apiRouter.put("/users/reset-password", UserController.resetPassword);
 apiRouter.post("/users/login", UserController.login);
 apiRouter.post("/users/logout", verifyToken, authorize(Role.User), UserController.logout);
 
+/** magnage user by admin */
+apiRouter.get("/admins/users", verifyToken, authorize(Role.Admin), UserController.allUsersForAdmin);
+apiRouter.get("/admins/users/:user_id", verifyToken, authorize(Role.Admin), UserController.getOne);
+apiRouter.put("/admins/users/:user_id/status", verifyToken, authorize(Role.Admin), UserController.suspend);
+apiRouter.delete("/admins/users/:user_id", verifyToken, authorize(Role.Admin), UserController.destroy);
+
 /** admins */
 apiRouter.post("/admins/login", AdminController.login);
 apiRouter.post("/admins/register", verifyToken, authorize(Role.Admin), AdminController.register);

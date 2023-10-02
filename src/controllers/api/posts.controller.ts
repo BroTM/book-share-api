@@ -239,7 +239,6 @@ export async function create(req: Request | any, res: Response, next: NextFuncti
         });
 }
 
-
 /*** @PUT @route /user/me/post/{post_id} */
 export async function publish(req: Request | any, res: Response, next: NextFunction) {
 

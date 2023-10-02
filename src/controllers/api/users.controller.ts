@@ -32,14 +32,14 @@ export function me(req: Request | any, res: Response, next: NextFunction) {
 export function bioUpdate(req: Request | any, res: Response, next: NextFunction) {
 
   const { id } = req.decoded;
-  const { user_name, bio} = req.body;
+  const { user_name, bio } = req.body;
 
   // prevent special character
   if (!Utils.isNoSpecialChar(user_name)) {
     return res.status(405).send({ message: message.req_err.err_405 })
   }
 
-  userRepository.bioUpdate(id, {user_name, bio})
+  userRepository.bioUpdate(id, { user_name, bio })
     .then((data: any) => {
       res.json({
         user: data
@@ -204,7 +204,7 @@ export async function signupConfirm(req: Request | any, res: Response, next: Nex
 export async function forgetPassword(req: Request | any, res: Response, next: NextFunction) {
 
   const { email } = req.body;
-  
+
   userRepository.forgetPassword(email)
     .then((data: any) => {
       res.json({
@@ -244,6 +244,145 @@ export function resetPassword(req: Request | any, res: Response, next: NextFunct
         msg = message.login.incorrect_userid;
       else if (err == "DO_NOT_MATCH_PASSWORD")
         msg = message.login.donot_match
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}
+
+////////////////////////// manage user by admin //////////////////////////
+
+/** @route /admin/users */
+export async function allUsersForAdmin(req: Request | any, res: Response, next: NextFunction) {
+
+  const { page, limit, status, user_type } = req.query;
+
+  // prevent sql injection
+  if (!Utils.isNumber(page) || !Utils.isNumber(limit)) {
+    return res.status(405).send({ message: message.req_err.err_405 });
+  }
+
+  if (!['no_verify', 'verified', 'suspended'].includes(status)) {
+    return res.status(405).send({ message: message.req_err.err_405 });
+  }
+
+  if (!['normal', 'premium'].includes(user_type)) {
+    return res.status(405).send({ message: message.req_err.err_405 });
+  }
+
+  userRepository.allUsersForAdmin({ page: parseInt(page), limit: parseInt(limit) }, { status, user_type })
+    .then((data: any) => {
+      res.json({
+        'users': data.users,
+        'pagination': {
+          'page': page,
+          'limit': limit,
+          'total': data.total
+        }
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      res.json({
+        status: "fail",
+        data: err,
+        message: message.other.something_wrong
+      })
+    });
+}
+
+/** @route /admins/users/{user_id} */
+export async function getOne(req: Request | any, res: Response, next: NextFunction) {
+  let user_id = req.params.user_id
+
+  // prevent sql injection
+  if (!Utils.isUUid(user_id)) {
+    return res.status(405).send({ message: message.req_err.err_405 })
+  }
+
+  userRepository.getOne(user_id)
+    .then((data: any) => {
+      res.json({
+        'user': data,
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.general.no_transaction;
+
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}
+
+
+/*** @PUT @route /admins/users/{user_id/status*/
+export async function suspend(req: Request | any, res: Response, next: NextFunction) {
+
+  const user_id = req.params.user_id;
+
+  // prevent sql injection
+  if (!Utils.isUUid(user_id)) {
+    return res.status(405).send({ message: message.req_err.err_405 })
+  }
+
+  let { id, name } = req.decoded;
+
+  userRepository.suspend(user_id, { id, name })
+    .then((data: any) => {
+      res.json({
+        'user': data,
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.general.no_transaction;
+      else if (err == "ALREADY_SUSPENDED")
+        msg = message.user.already_suspended;
+
+      res.json({
+        status: "fail",
+        data: err,
+        message: msg
+      })
+    });
+}
+
+/*** @route /admins/users/{user_id}} */
+export async function destroy(req: Request | any, res: Response, next: NextFunction) {
+
+  const user_id = req.params.user_id;
+
+  // prevent sql injection
+  if (!Utils.isUUid(user_id)) {
+    return res.status(405).send({ message: message.req_err.err_405 })
+  }
+
+  userRepository.destroy(user_id)
+    .then((data: any) => {
+      res.json({
+        message: message.user.delete_success
+      });
+    })
+    .catch((err: any) => {
+      console.log(`Error ${err}`);
+
+      let msg = message.other.something_wrong;
+      if (err == "NO_TRANSACTION")
+        msg = message.general.no_transaction;
+
       res.json({
         status: "fail",
         data: err,

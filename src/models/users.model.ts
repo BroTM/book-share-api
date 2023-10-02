@@ -1,7 +1,8 @@
-import { Model, Table, Column, DataType, HasMany, IsUUID, Length, Is, IsEmail, IsIn, IsNumeric } from "sequelize-typescript";
+import { Model, Table, Column, DataType, HasMany, IsUUID, Length, Is, IsEmail, IsIn, IsNumeric, ForeignKey, BelongsTo } from "sequelize-typescript";
 import { current_timestamp } from "../utils/common";
 import Post from "./posts.model";
 import Utils from "../utils/utils";
+import Admin from "./admins.model";
 
 @Table({
   tableName: "users",
@@ -59,7 +60,7 @@ class User extends Model {
   })
   declare user_type: 'normal' | 'premium';
 
-  @IsIn([['no_verify', 'verified']])
+  @IsIn([['no_verify', 'verified', 'suspended']])
   @Column({
     type: DataType.ENUM('no_verify', 'verified', 'suspended'),
     allowNull: false,
@@ -78,10 +79,14 @@ class User extends Model {
   })
   declare created_at: number;
 
+  @ForeignKey(()=> Admin)
   @Column({
     type: DataType.STRING(45)
   })
   declare updated_by?: string;
+
+  @BelongsTo(() => Admin, 'updated_by')
+  declare updated_user?: Admin;
 
   @IsNumeric
   @Column({
