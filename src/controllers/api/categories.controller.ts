@@ -86,7 +86,7 @@ export async function create(req: Request | any, res: Response, next: NextFuncti
         });
 }
 
-/** @route /admins/categories */
+/** @route /admins/categories/{category_id} */
 export async function getOne(req: Request | any, res: Response, next: NextFunction) {
     let category_id = req.params.category_id
 
