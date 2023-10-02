@@ -1,6 +1,6 @@
 import Post from "@models/posts.model";
 // import {  } from "@dtos/posts.dto";
-import { paginateDto } from "@dtos/common.dto";
+import { paginateDto, updateUserInfoDto } from "@dtos/common.dto";
 
 export interface IPostRepository {
 
@@ -22,9 +22,6 @@ export interface IPostRepository {
     /** @route /admin/users/{user_id}/posts/{post_id} */
     detailByUserIdForAdmin: (post_id: string, user_id: string) => Promise<Post>;
 
-    /** @route /admin/posts/{post_id}/status */
-    suspendPost: (post_id: string) => Promise<Post>;
-
     /** @route /user/post */
     create: (data: Post) => Promise<Post>;
 
@@ -38,5 +35,5 @@ export interface IPostRepository {
     report: (post_id: string, user_id: string) => Promise<Post>;
 
     /** @put @route /admin/post/{post_id}/status */
-    reportStatus: (post_id: string, admin_id: string) => Promise<Post>;
+    reportStatus: (post_id: string, update_user: updateUserInfoDto) => Promise<Post>;
 }

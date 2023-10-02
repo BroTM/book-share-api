@@ -352,9 +352,9 @@ export async function reportStatus(req: Request | any, res: Response, next: Next
         return res.status(405).send({ message: message.req_err.err_405 })
     }
 
-    const { id } = req.decoded; //admin_id
+    const { id, name } = req.decoded; //admin
 
-    postRepository.reportStatus(post_id, id)
+    postRepository.reportStatus(post_id, {id, name})
         .then((data: any) => {
             res.json({
                 'post': data,

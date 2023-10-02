@@ -2,7 +2,7 @@
 import Post from "@models/posts.model";
 
 import { IPostRepository } from "./posts.interface";
-import { paginateDto } from "@dtos/common.dto";
+import { paginateDto, updateUserInfoDto } from "@dtos/common.dto";
 import Category from "@models/categories.model";
 import Database from "../../database/mysql";
 import { QueryTypes, Sequelize } from "sequelize";
@@ -215,11 +215,6 @@ class PostRepository implements IPostRepository {
         }
     }
 
-    /** @oute /admin/posts/{post_id}/status */
-    public async suspendPost(post_id: string): Promise<Post> {
-        return new Post;
-    }
-
     /** @route /user/post */
     public async create(_data: Post): Promise<Post> {
 
@@ -234,7 +229,7 @@ class PostRepository implements IPostRepository {
 
             let category = await Category.findByPk(_data.category_id);
 
-            const { updated_at, updated_by, category_id, ...withoutUpdateInfo } = post.dataValues;
+            const { created_by, updated_at, updated_by, category_id, ...withoutUpdateInfo } = post.dataValues;
 
             return { ...withoutUpdateInfo, category_name: category?.name };
         } catch (err: any) {
@@ -377,7 +372,7 @@ class PostRepository implements IPostRepository {
      * publish to reported
      * auth user must be owner
      * @PUT @route /user/me/post/{post_id} */
-    public async reportStatus(post_id: string, admin_id: string): Promise<Post> {
+    public async reportStatus(_post_id: string, _update_user: updateUserInfoDto): Promise<Post> {
         try {
             let post = await Post.findOne(
                 {
@@ -390,22 +385,16 @@ class PostRepository implements IPostRepository {
                             model: User,
                             attributes: [],
                             as: "created_user"
-                        },
-                        {
-                            model: User,
-                            attributes: [],
-                            as: "updated_user"
                         }
                     ],
                     attributes: [
                         'post_id', 'title', 'content', 'created_at', 'status', 'updated_at',
                         [Sequelize.literal('category.name'), 'category_name'],
-                        [Sequelize.literal('created_user.user_name'), 'created_name'],
-                        [Sequelize.literal('updated_user.user_name'), 'updated_name']
+                        [Sequelize.literal('created_user.user_name'), 'created_name']
 
                     ],
                     where: {
-                        post_id: post_id,
+                        post_id: _post_id,
                         status: ['reported', 'published']
                     }
                 }
@@ -419,13 +408,13 @@ class PostRepository implements IPostRepository {
 
             post.status = 'reported';
             post.updated_at = current_timestamp();
-            post.updated_by = admin_id;
+            post.updated_by = _update_user.id;
 
             let affectedRows = await post.save();
 
-            let { updated_at, updated_by, ...withoutUpdateInfo } = post.dataValues;
+            let { updated_by, ...withoutUpdateInfo } = post.dataValues;
 
-            return withoutUpdateInfo;
+            return {...withoutUpdateInfo, updated_name: _update_user.name};
         } catch (err: any) {
             return Promise.reject(err);
         }
