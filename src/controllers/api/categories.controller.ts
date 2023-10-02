@@ -78,10 +78,14 @@ export async function create(req: Request | any, res: Response, next: NextFuncti
         .catch((err: any) => {
             console.log(`Error ${err}`);
 
+            let msg = message.general.create_fail;
+            if (err == "DUPLICATE_CATEGORY")
+                msg = message.category.duplicate_category;
+
             res.json({
                 status: "fail",
                 data: process.env.NODE_ENV == "development" ? err : {},
-                message: message.general.create_fail
+                message: msg
             })
         });
 }

@@ -1,4 +1,4 @@
-export default{
+export default {
     general: {
         'create_success': 'အသစ်ဖန်တီးမှု အောင်မြင်ပါသည်။',
         'create_fail': 'အသစ်ဖန်တီးမှု မအောင်မြင်ပါ။',
@@ -9,6 +9,11 @@ export default{
         'restore_success': 'ပြန်လည်ထည့်သွင်းမှု အောင်မြင်ပါသည်။',
         'restore_fail': 'ပြန်လည်ထည့်သွင်းမှု မအောင်မြင်ပါ။',
         'no_transaction': 'ID မှားယွင်းမှုဖြစ်နေပါသည်။'
+    },
+    register: {
+        'duplicate_name': "ဤအမည်ဖြင့် အကောင့်ရှိပြီးဖြစ်နေပါသည်။",
+        'duplicate_login_id': "ဤIDဖြင့် အကောင့်ရှိပြီးဖြစ်နေပါသည်။",
+        'duplicate_email': "ဤemailဖြင့် အကောင့်ရှိပြီးဖြစ်နေပါသည်။",
     },
     req_err: {
         'err_405': 'Method not allowed'
@@ -39,6 +44,7 @@ export default{
         'delete_success': 'User have been deleted successfully!'
     },
     category: {
-        'delete_success': 'Category have been deleted successfully!'
+        'delete_success': 'Category have been deleted successfully!',
+        'duplicate_category': "ဤအမည်ဖြင့် စာရင်းတွင်ရှိပြီးဖြစ်နေပါသည်။ အခြားအမည်တစ်ခုကို ဖန်တီးပါ။",
     }
 }

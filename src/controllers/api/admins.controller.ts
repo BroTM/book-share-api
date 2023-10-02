@@ -15,8 +15,8 @@ export function login(req: Request, res: Response, next: NextFunction) {
 
   adminRepository.login(req.body!)
     .then((data: any) => {
-      res.json({ 
-        admin: { ...data } 
+      res.json({
+        admin: { ...data }
       });
     })
     .catch((err: any) => {
@@ -90,16 +90,23 @@ export async function register(req: Request | any, res: Response, next: NextFunc
     .then((data: any) => {
       res.json({
         // 'status': "success",
-        'admin': {...data, created_name: req.decoded.name},
+        'admin': { ...data, created_name: req.decoded.name },
         // 'message': message.general.create_success
       });
     })
     .catch((err: any) => {
       console.log(`Error ${err}`);
+
+      let msg = message.general.create_fail;
+      if (err == "DUPLICATE_LOGIN_ID")
+        msg = message.register.duplicate_login_id;
+      else if (err == "DUPLICATE_NAME")
+        msg = message.register.duplicate_name;
+
       res.json({
         status: "fail",
-        data: process.env.NODE_ENV == "development"? err : {},
-        message: message.general.create_fail
+        data: process.env.NODE_ENV == "development" ? err : {},
+        message: msg
       })
     });
 }

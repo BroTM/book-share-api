@@ -59,6 +59,14 @@ class CategoryRepository implements ICategoryRepository {
     public async create(_data: Category): Promise<Category | any> {
 
         try {
+
+            const not_available = await Category.findOne({
+                where: { name: _data.name }
+            });
+
+            if (not_available) {
+                return Promise.reject('DUPLICATE_CATEGORY');
+            }
             let category = await Category.create({
                 name: _data.name,
                 created_by: _data.created_by,

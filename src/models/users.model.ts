@@ -48,7 +48,8 @@ class User extends Model {
 
   @Column({
     type: DataType.STRING(400),
-    allowNull: false
+    allowNull: false,
+    unique: true
   })
   declare token: string;
 

@@ -168,10 +168,15 @@ export async function signup(req: Request | any, res: Response, next: NextFuncti
     })
     .catch((err: any) => {
       console.log(`Error ${err}`);
+
+      let msg = message.login.signup_fail;
+      if (err == "DUPLICATE_EMAIL")
+        msg = message.register.duplicate_email;
+
       res.json({
         status: "fail",
         data: process.env.NODE_ENV == "development" ? err : {},
-        message: message.login.signup_fail
+        message: msg
       })
     });
 }

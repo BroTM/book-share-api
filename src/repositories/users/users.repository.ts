@@ -129,6 +129,14 @@ class UserRepository implements IUserRepository {
     public async signup(_data: User): Promise<void> {
 
         try {
+            const not_available = await User.findOne({
+                where: { email: _data.email }
+            });
+
+            if (not_available) {
+                return Promise.reject('DUPLICATE_EMAIL');
+            }
+
             //hash the password
             const salt = bcrypt.genSaltSync(10);
 
@@ -168,8 +176,8 @@ class UserRepository implements IUserRepository {
             const _token = await adminsRepository.generateToken(user.user_id!, 'USER', 'REGISTER', user.user_name);
             // const affectedRows = await User.update({ token: _token }, { where: { user_id: user.user_id } })
 
-            if(user.status == "verified") return Promise.reject('ALREADY_VERIFIED');
-            
+            if (user.status == "verified") return Promise.reject('ALREADY_VERIFIED');
+
             user.status = "verified";
             user.updated_at = current_timestamp();
 
