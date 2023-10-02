@@ -20,6 +20,7 @@ export default{
         'incorrect_userid': 'Incorrect username or ID!',
         'incorrect_password': 'Incorrect password!',
         'already_logout': 'Already logout!',
+        'already_verified': 'Already verified!',
         'please_login': 'Please login first',
         'logout_success': 'Logout successfully.',
         'no_user': `User doesn't exist`,

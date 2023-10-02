@@ -161,12 +161,19 @@ class UserRepository implements IUserRepository {
 
         try {
 
-            let user = await User.findOne({ where: { email: _data.email, token: _data.token, status: 'verified' } });
+            let user = await User.findOne({ where: { email: _data.email, token: _data.token, status: ['no_verify', 'verified'] } });
 
             if (!user) return Promise.reject("NO_TRANSACTION");
 
             const _token = await adminsRepository.generateToken(user.user_id!, 'USER', 'REGISTER', user.user_name);
             // const affectedRows = await User.update({ token: _token }, { where: { user_id: user.user_id } })
+
+            if(user.status == "verified") return Promise.reject('ALREADY_VERIFIED');
+            
+            user.status = "verified";
+            user.updated_at = current_timestamp();
+
+            const affectedRows = await user.save();
 
             const { password, user_type, created_by, updated_by, ...withoutPassword } = user.dataValues;
             withoutPassword.token = _token;

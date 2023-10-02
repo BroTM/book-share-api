@@ -192,6 +192,8 @@ export async function signupConfirm(req: Request | any, res: Response, next: Nex
       let msg = message.login.signup_fail;
       if (err == "NO_TRANSACTION")
         msg = message.login.no_user;
+      else if (err == "ALREADY_VERIFIED")
+        msg = message.login.already_verified;
 
       res.json({
         status: "fail",
